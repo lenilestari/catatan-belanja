@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_secondary">
+
+    <!-- Header (pinned) -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        app:elevation="4dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/btnBack"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="‹"
+                android:textSize="24sp"
+                android:textColor="@color/text_primary"
+                android:layout_marginEnd="12dp"
+                android:padding="4dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackgroundBorderless"/>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Sumber Budget" android:textSize="16sp"
+                    android:textStyle="bold" android:textColor="@color/text_primary"/>
+                <TextView android:id="@+id/tvPeriodHeader"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:textSize="12sp" android:textColor="@color/text_secondary" android:text="April 2026"/>
+            </LinearLayout>
+
+            <!-- Lihat History as header icon button -->
+            <TextView
+                android:id="@+id/btnHistory"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Riwayat"
+                android:textSize="13sp"
+                android:textColor="@color/accent_blue_text"
+                android:padding="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackgroundBorderless"/>
+        </LinearLayout>
+
+        <!-- Month Selector -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="12dp">
+
+            <TextView
+                android:id="@+id/btnPrevMonth"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:gravity="center"
+                android:text="◀"
+                android:textSize="18sp"
+                android:textColor="@color/text_primary"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackgroundBorderless"/>
+
+            <TextView
+                android:id="@+id/tvCurrentPeriod"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:text="April 2026"/>
+
+            <TextView
+                android:id="@+id/btnNextMonth"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:gravity="center"
+                android:text="▶"
+                android:textSize="18sp"
+                android:textColor="@color/text_primary"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackgroundBorderless"/>
+        </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Scrollable content -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:paddingBottom="168dp"
+        android:clipToPadding="false">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Budget 3-col Card -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_card"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:padding="12dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="BUDGET" android:textSize="10sp" android:textColor="@color/text_caption" android:letterSpacing="0.05"/>
+                    <TextView android:id="@+id/tvBudget" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp" android:text="Rp0" android:textSize="14sp" android:textStyle="bold" android:textColor="@color/text_primary"/>
+                </LinearLayout>
+
+                <View android:layout_width="0.5dp" android:layout_height="match_parent" android:background="@color/border_light"/>
+
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:padding="12dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="SPENDING" android:textSize="10sp" android:textColor="@color/text_caption" android:letterSpacing="0.05"/>
+                    <TextView android:id="@+id/tvSpending" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp" android:text="Rp0" android:textSize="14sp" android:textStyle="bold" android:textColor="@color/text_primary"/>
+                </LinearLayout>
+
+                <View android:layout_width="0.5dp" android:layout_height="match_parent" android:background="@color/border_light"/>
+
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:padding="12dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="LEFT" android:textSize="10sp" android:textColor="@color/text_caption" android:letterSpacing="0.05"/>
+                    <TextView android:id="@+id/tvLeft" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp" android:text="Rp0" android:textSize="14sp" android:textStyle="bold" android:textColor="@color/success_text"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Carry-Over Banner -->
+            <LinearLayout
+                android:id="@+id/bannerCarryOver"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_badge_green"
+                android:padding="12dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="12dp"
+                android:visibility="gone">
+                <TextView android:id="@+id/tvCarryOver"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:textSize="13sp" android:textColor="@color/success_text"
+                    android:text="💰 Sisa bulan lalu: +Rp200.000"/>
+            </LinearLayout>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="DARI SIAPA" android:textSize="11sp" android:textColor="@color/text_caption"
+                android:letterSpacing="0.05" android:layout_marginBottom="10dp"/>
+
+            <LinearLayout
+                android:id="@+id/shimmerContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <include layout="@layout/item_shimmer_card"/>
+                <include layout="@layout/item_shimmer_card"/>
+                <include layout="@layout/item_shimmer_card"/>
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvSources"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:layout_marginBottom="8dp"
+                android:visibility="invisible"/>
+
+            <LinearLayout
+                android:id="@+id/btnTambahSource"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_dashed_button"
+                android:foreground="@drawable/bg_ripple_outline"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:layout_marginBottom="8dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="+ Tambah sumber budget" android:textSize="14sp" android:textColor="@color/text_secondary"/>
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Floating Bottom Navigation -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="12dp"
+        android:elevation="8dp">
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottomNav"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_nav_floating"
+            android:fitsSystemWindows="false"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            app:menu="@menu/bottom_nav_menu"
+            app:itemIconTint="@color/bottom_nav_icon_tint"
+            app:itemTextColor="@color/bottom_nav_color"
+            app:labelVisibilityMode="labeled"/>
+    </FrameLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

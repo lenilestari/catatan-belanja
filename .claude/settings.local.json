@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem *)",
+      "PowerShell(Test-Path *)",
+      "Bash(gradlew.bat signingReport)",
+      "Bash(./gradlew signingReport)",
+      "Bash(curl *)",
+      "WebFetch(domain:ai.google.dev)"
+    ]
+  }
+}

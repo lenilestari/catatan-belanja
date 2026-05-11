@@ -1,0 +1,113 @@
+<resources>
+    <string name="app_name">Catatan Belanja</string>
+    <string name="login_title">Catatan Belanja</string>
+    <string name="login_subtitle">Catat belanja, ngomong aja.</string>
+    <string name="btn_login_google">Masuk dengan Google</string>
+    <string name="login_footer">Dengan masuk, kamu setuju dengan Kebijakan Privasi dan Syarat Penggunaan.</string>
+
+    <string name="label_kategori_catatan">KATEGORI CATATAN</string>
+    <string name="label_wishlist">WISHLIST</string>
+    <string name="btn_lihat_semua">Lihat semua →</string>
+    <string name="btn_tambah_kategori">+ Tambah kategori</string>
+    <string name="btn_tambah_wishlist">+ Tambah wishlist</string>
+    <string name="btn_mulai_catat">Mulai catat</string>
+
+    <string name="label_pilih_sub_kategori">PILIH SUB-KATEGORI</string>
+    <string name="btn_lanjut_input">Lanjut ke input</string>
+
+    <string name="tab_voice">🎤 Voice</string>
+    <string name="tab_manual">⌨️ Manual</string>
+    <string name="hint_tap_mic">Tap mic untuk mulai rekam</string>
+    <string name="status_recording">● Merekam...</string>
+    <string name="status_stop_mic">Tap mic untuk berhenti</string>
+    <string name="label_didengar">DIDENGAR</string>
+    <string name="btn_ulang">Ulang</string>
+    <string name="btn_tambah">+ Tambah</string>
+
+    <string name="hint_nama_barang">Nama barang (contoh: Tomat)</string>
+    <string name="hint_jumlah">Jumlah</string>
+    <string name="hint_harga_total">0</string>
+    <string name="label_nama_barang">NAMA BARANG</string>
+    <string name="label_jumlah">JUMLAH</string>
+    <string name="label_satuan">SATUAN</string>
+    <string name="label_harga_total">HARGA TOTAL</string>
+    <string name="btn_tambah_ke_list">+ Tambah ke list</string>
+    <string name="prefix_rp">Rp</string>
+
+    <string name="title_batch_list">List sementara</string>
+    <string name="btn_rekam_lagi">🎤 Rekam lagi</string>
+    <string name="btn_selesai_ai">✨ Selesai → AI</string>
+    <string name="btn_simpan_langsung">Simpan</string>
+
+    <string name="title_ai_loading">AI sedang memproses...</string>
+    <string name="subtitle_ai_loading">Menstrukturkan input belanja</string>
+    <string name="label_estimasi">± 2 DETIK</string>
+
+    <string name="title_hasil_parsing">Hasil parsing</string>
+    <string name="badge_ai">✓ AI</string>
+    <string name="label_total">TOTAL</string>
+    <string name="btn_edit">✏️ Edit</string>
+    <string name="btn_simpan">Simpan</string>
+
+    <string name="title_history">Riwayat</string>
+    <string name="subtitle_history">Semua belanja kamu</string>
+    <string name="label_bulan_ini">BULAN INI</string>
+    <string name="label_rata_rata">RATA-RATA / HARI</string>
+    <string name="btn_export_excel">📥 Export Excel</string>
+    <string name="btn_buka_folder">📂 Buka folder</string>
+    <string name="label_sesi_belanja">SESI BELANJA</string>
+
+    <string name="btn_hapus">🗑️ Hapus</string>
+    <string name="btn_export">📥 Export</string>
+
+    <string name="title_tambah_wishlist">Tambah wishlist</string>
+    <string name="label_wishlist_cap">WISHLIST</string>
+    <string name="hint_nama_wishlist">Nama barang (contoh: Sepeda Listrik)</string>
+    <string name="label_harga_target">HARGA TARGET</string>
+    <string name="label_sudah_ditabung">SUDAH DITABUNG</string>
+    <string name="label_target_per_bulan">TARGET NABUNG PER BULAN</string>
+    <string name="label_estimasi_tercapai">ESTIMASI TERCAPAI</string>
+    <string name="btn_batal">Batal</string>
+    <string name="btn_simpan_wishlist">Simpan wishlist</string>
+    <string name="btn_hapus_wishlist">Hapus wishlist</string>
+
+    <string name="msg_no_session">Belum ada sesi belanja</string>
+    <string name="msg_no_wishlist">Belum ada wishlist</string>
+    <string name="msg_saving">Menyimpan...</string>
+    <string name="msg_saved">Tersimpan!</string>
+    <string name="msg_error">Terjadi kesalahan</string>
+    <string name="msg_export_success">Excel berhasil disimpan ke Downloads</string>
+    <string name="msg_export_failed">Export gagal</string>
+    <string name="msg_login_failed">Login gagal</string>
+    <string name="msg_processing">Memproses dengan AI...</string>
+    <string name="msg_no_input">Tambahkan minimal 1 item dulu</string>
+    <string name="msg_confirm_delete">Hapus sesi ini?</string>
+    <string name="msg_confirm_delete_wishlist">Hapus wishlist ini?</string>
+    <string name="yes">Ya</string>
+    <string name="cancel">Batal</string>
+    <string name="msg_auto_cleanup">⚠️ Reset otomatis dalam %d hari. Excel akan diekspor sebelum data dihapus.</string>
+    <string name="msg_nabung_per_bulan">Nabung Rp%s/bulan</string>
+    <string name="msg_bulan_lagi">~%d bln lagi</string>
+
+    <string-array name="satuan_array">
+        <item>buah</item>
+        <item>kg</item>
+        <item>gram</item>
+        <item>ons</item>
+        <item>liter</item>
+        <item>ml</item>
+        <item>bungkus</item>
+        <item>botol</item>
+        <item>kaleng</item>
+        <item>tray</item>
+        <item>ikat</item>
+        <item>lembar</item>
+        <item>lusin</item>
+        <item>meter</item>
+        <item>porsi</item>
+        <item>pcs</item>
+        <item>set</item>
+        <item>unit</item>
+        <item>lainnya</item>
+    </string-array>
+</resources>

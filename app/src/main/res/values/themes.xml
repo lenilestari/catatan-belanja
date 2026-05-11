@@ -1,0 +1,31 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Base.Theme.Aethersea" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/button_primary</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSurface">@color/bg_primary</item>
+        <item name="android:windowBackground">@color/bg_primary</item>
+        <item name="android:statusBarColor">@color/bg_primary</item>
+        <item name="android:navigationBarColor">@color/bg_primary</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <style name="Theme.Aethersea" parent="Base.Theme.Aethersea" />
+
+    <style name="TextAppearance.Caption" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:textSize">11sp</item>
+        <item name="android:textColor">@color/text_caption</item>
+        <item name="android:letterSpacing">0.05</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="TextAppearance.Title" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <!-- FAB corner radius — pill shape -->
+    <style name="ShapeAppearance.Aethersea.FAB" parent="">
+        <item name="cornerSize">50%</item>
+    </style>
+</resources>

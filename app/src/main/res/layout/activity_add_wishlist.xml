@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_secondary">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="‹"
+            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            android:layout_marginEnd="12dp"
+            android:padding="4dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="WISHLIST"
+                android:textSize="10sp"
+                android:textColor="@color/text_caption"
+                android:letterSpacing="0.05"/>
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tambah wishlist"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="NAMA BARANG" android:textSize="11sp" android:textColor="@color/text_caption"
+                android:letterSpacing="0.05" android:layout_marginBottom="6dp"/>
+
+            <EditText android:id="@+id/etName"
+                android:layout_width="match_parent" android:layout_height="48dp"
+                android:background="@drawable/bg_input" android:paddingHorizontal="12dp"
+                android:textSize="15sp" android:textColor="@color/text_primary"
+                android:hint="Sepeda Listrik" android:textColorHint="@color/text_caption"
+                android:inputType="textCapWords" android:layout_marginBottom="12dp"/>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="HARGA TARGET" android:textSize="11sp" android:textColor="@color/text_caption"
+                android:letterSpacing="0.05" android:layout_marginBottom="6dp"/>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="48dp"
+                android:background="@drawable/bg_input" android:orientation="horizontal"
+                android:gravity="center_vertical" android:layout_marginBottom="8dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:paddingStart="12dp" android:text="Rp" android:textSize="15sp" android:textColor="@color/text_secondary"/>
+                <EditText android:id="@+id/etTarget"
+                    android:layout_width="match_parent" android:layout_height="match_parent"
+                    android:background="@null" android:paddingHorizontal="6dp"
+                    android:textSize="15sp" android:textColor="@color/text_primary"
+                    android:hint="0" android:textColorHint="@color/text_caption" android:inputType="number"/>
+            </LinearLayout>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="SUDAH DITABUNG" android:textSize="11sp" android:textColor="@color/text_caption"
+                android:letterSpacing="0.05" android:layout_marginBottom="6dp"/>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="48dp"
+                android:background="@drawable/bg_input" android:orientation="horizontal"
+                android:gravity="center_vertical" android:layout_marginBottom="8dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:paddingStart="12dp" android:text="Rp" android:textSize="15sp" android:textColor="@color/text_secondary"/>
+                <EditText android:id="@+id/etSaved"
+                    android:layout_width="match_parent" android:layout_height="match_parent"
+                    android:background="@null" android:paddingHorizontal="6dp"
+                    android:textSize="15sp" android:textColor="@color/text_primary"
+                    android:hint="0" android:textColorHint="@color/text_caption" android:inputType="number"/>
+            </LinearLayout>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="TARGET NABUNG PER BULAN" android:textSize="11sp" android:textColor="@color/text_caption"
+                android:letterSpacing="0.05" android:layout_marginBottom="6dp"/>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="48dp"
+                android:background="@drawable/bg_input" android:orientation="horizontal"
+                android:gravity="center_vertical" android:layout_marginBottom="8dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:paddingStart="12dp" android:text="Rp" android:textSize="15sp" android:textColor="@color/text_secondary"/>
+                <EditText android:id="@+id/etMonthly"
+                    android:layout_width="match_parent" android:layout_height="match_parent"
+                    android:background="@null" android:paddingHorizontal="6dp"
+                    android:textSize="15sp" android:textColor="@color/text_primary"
+                    android:hint="0" android:textColorHint="@color/text_caption" android:inputType="number"/>
+            </LinearLayout>
+
+            <!-- Quick Chips -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:layout_marginBottom="16dp">
+                <TextView android:id="@+id/chip250k"
+                    android:layout_width="0dp" android:layout_height="36dp" android:layout_weight="1"
+                    android:layout_marginEnd="6dp" android:background="@drawable/bg_chip"
+                    android:gravity="center" android:text="Rp250.000" android:textSize="12sp" android:textColor="@color/text_primary"/>
+                <TextView android:id="@+id/chip500k"
+                    android:layout_width="0dp" android:layout_height="36dp" android:layout_weight="1"
+                    android:layout_marginEnd="6dp" android:background="@drawable/bg_chip"
+                    android:gravity="center" android:text="Rp500.000" android:textSize="12sp" android:textColor="@color/text_primary"/>
+                <TextView android:id="@+id/chip1m"
+                    android:layout_width="0dp" android:layout_height="36dp" android:layout_weight="1"
+                    android:background="@drawable/bg_chip"
+                    android:gravity="center" android:text="Rp1.000.000" android:textSize="12sp" android:textColor="@color/text_primary"/>
+            </LinearLayout>
+
+            <!-- Estimasi Card -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:background="@drawable/bg_card" android:padding="14dp"
+                android:orientation="horizontal" android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="🎯" android:textSize="20sp" android:layout_marginEnd="10dp"/>
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:orientation="vertical">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="ESTIMASI TERCAPAI" android:textSize="10sp" android:textColor="@color/text_caption"
+                        android:letterSpacing="0.05"/>
+                    <TextView android:id="@+id/tvEstimasi"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp" android:textSize="14sp" android:textStyle="bold"
+                        android:textColor="@color/text_primary" android:text="Isi form dulu"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView android:id="@+id/btnHapus"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:gravity="center" android:textSize="14sp" android:textColor="@color/recording_icon"
+                android:text="🗑️ Hapus wishlist" android:padding="8dp"
+                android:visibility="gone"/>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Sticky Bottom -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:background="@color/white" android:padding="16dp" android:orientation="horizontal">
+
+        <LinearLayout android:id="@+id/btnBatal"
+            android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1"
+            android:layout_marginEnd="8dp" android:background="@drawable/bg_button_outline"
+            android:foreground="@drawable/bg_ripple_outline"
+            android:clickable="true" android:focusable="true"
+            android:gravity="center">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Batal" android:textSize="14sp" android:textColor="@color/text_primary"/>
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/btnSimpan"
+            android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1"
+            android:background="@drawable/bg_button_primary"
+            android:foreground="@drawable/bg_ripple_primary"
+            android:clickable="true" android:focusable="true"
+            android:gravity="center">
+            <TextView android:id="@+id/tvBtnSimpan"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Simpan wishlist" android:textSize="14sp" android:textStyle="bold" android:textColor="@color/white"/>
+            <ProgressBar android:id="@+id/pbBtnSimpan"
+                android:layout_width="20dp" android:layout_height="20dp"
+                android:indeterminateTint="@color/white" android:visibility="gone"/>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

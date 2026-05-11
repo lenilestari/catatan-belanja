@@ -1,0 +1,508 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_secondary">
+
+    <!-- ── Scrollable content ─────────────────────────────────────── -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="168dp"
+        android:clipToPadding="false"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Greeting Header -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvGreeting"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@color/text_secondary"
+                        android:text="Selamat pagi,"/>
+
+                    <TextView
+                        android:id="@+id/tvUsername"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_primary"
+                        android:text="Bu Leni 👋"/>
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/layoutAvatar"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackgroundBorderless">
+
+                    <LinearLayout
+                        android:id="@+id/layoutInitials"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:gravity="center"
+                        android:background="@drawable/bg_badge_blue">
+                        <TextView
+                            android:id="@+id/tvAvatarInitial"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/accent_blue_text"
+                            android:text="LN"/>
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/ivAvatarMain"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:scaleType="centerCrop"
+                        android:clipToOutline="true"
+                        android:background="@drawable/bg_badge_blue"
+                        android:visibility="gone"/>
+                </FrameLayout>
+            </LinearLayout>
+
+            <!-- Total Bulan Ini Card (Dark) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_total_card"
+                android:orientation="vertical"
+                android:padding="20dp"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="TOTAL BULAN INI"
+                    android:textSize="11sp"
+                    android:textColor="#99FFFFFF"
+                    android:letterSpacing="0.05"/>
+
+                <TextView
+                    android:id="@+id/tvTotalBulan"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Rp0"
+                    android:textSize="28sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="8dp">
+
+                    <TextView
+                        android:id="@+id/tvSessionCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:textColor="#B3FFFFFF"
+                        android:text="📈 0 sesi"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:textColor="#B3FFFFFF"
+                        android:text="  ·  "/>
+
+                    <TextView
+                        android:id="@+id/tvTodayDate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:textColor="#B3FFFFFF"
+                        android:text="27 April 2026"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Budget Card 3-Column -->
+            <LinearLayout
+                android:id="@+id/cardBudget"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_card"
+                android:foreground="@drawable/bg_ripple_outline"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="12dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="BUDGET"
+                        android:textSize="10sp"
+                        android:textColor="@color/text_caption"
+                        android:letterSpacing="0.05"/>
+                    <TextView
+                        android:id="@+id/tvBudget"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Rp0"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_primary"/>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="0.5dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/border_light"/>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="12dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="SPENDING"
+                        android:textSize="10sp"
+                        android:textColor="@color/text_caption"
+                        android:letterSpacing="0.05"/>
+                    <TextView
+                        android:id="@+id/tvSpending"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Rp0"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_primary"/>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="0.5dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/border_light"/>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="12dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="LEFT"
+                        android:textSize="10sp"
+                        android:textColor="@color/text_caption"
+                        android:letterSpacing="0.05"/>
+                    <TextView
+                        android:id="@+id/tvLeft"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Rp0"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/success_text"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Date Card -->
+            <LinearLayout
+                android:id="@+id/cardDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_card"
+                android:foreground="@drawable/bg_ripple_outline"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="14dp"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="📅"
+                    android:textSize="18sp"
+                    android:layout_marginEnd="10dp"/>
+
+                <TextView
+                    android:id="@+id/tvSelectedDate"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_primary"
+                    android:text="27 April 2026"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hari ini"
+                    android:textSize="12sp"
+                    android:textColor="@color/accent_blue_text"/>
+            </LinearLayout>
+
+            <!-- Kategori Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="KATEGORI CATATAN"
+                    android:textSize="11sp"
+                    android:textColor="@color/text_caption"
+                    android:letterSpacing="0.05"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/shimmerCategories"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <include layout="@layout/item_shimmer_card"/>
+                <include layout="@layout/item_shimmer_card"/>
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvCategories"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:layout_marginBottom="8dp"
+                android:visibility="invisible"/>
+
+            <LinearLayout
+                android:id="@+id/btnTambahKategori"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_dashed_button"
+                android:foreground="@drawable/bg_ripple_outline"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:layout_marginBottom="16dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="+ Tambah kategori"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_secondary"/>
+            </LinearLayout>
+
+            <!-- Wishlist Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="🎯 WISHLIST"
+                    android:textSize="11sp"
+                    android:textColor="@color/text_caption"
+                    android:letterSpacing="0.05"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/shimmerWishlists"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <include layout="@layout/item_shimmer_card"/>
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvWishlists"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:layout_marginBottom="8dp"
+                android:visibility="invisible"/>
+
+            <LinearLayout
+                android:id="@+id/btnTambahWishlist"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_dashed_button"
+                android:foreground="@drawable/bg_ripple_outline"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:layout_marginBottom="8dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="+ Tambah wishlist"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_secondary"/>
+            </LinearLayout>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- ── Speed Dial Scrim (semi-transparent overlay) ──────────── -->
+    <View
+        android:id="@+id/speedDialScrim"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#BB000000"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true"/>
+
+    <!-- ── Speed Dial Item: Riwayat ───────────────────────────────── -->
+    <LinearLayout
+        android:id="@+id/sdItemRiwayat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="244dp"
+        android:layout_marginEnd="12dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:visibility="invisible">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Riwayat"
+            android:textSize="13sp"
+            android:textColor="@color/text_primary"
+            android:background="@drawable/bg_speed_dial_label"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
+            android:layout_marginEnd="10dp"
+            android:elevation="4dp"/>
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/sdFabRiwayat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_history"
+            android:contentDescription="Riwayat"
+            app:backgroundTint="@color/button_primary"
+            app:tint="@android:color/white"
+            app:fabSize="mini"
+            android:elevation="6dp"/>
+    </LinearLayout>
+
+    <!-- ── Speed Dial Item: Budget ────────────────────────────────── -->
+    <LinearLayout
+        android:id="@+id/sdItemBudget"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="184dp"
+        android:layout_marginEnd="12dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:visibility="invisible">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tambah Budget"
+            android:textSize="13sp"
+            android:textColor="@color/text_primary"
+            android:background="@drawable/bg_speed_dial_label"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
+            android:layout_marginEnd="10dp"
+            android:elevation="4dp"/>
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/sdFabBudget"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_wallet"
+            android:contentDescription="Tambah Budget"
+            app:backgroundTint="@color/button_primary"
+            app:tint="@android:color/white"
+            app:fabSize="mini"
+            android:elevation="6dp"/>
+    </LinearLayout>
+
+    <!-- ── Main FAB (Speed Dial trigger) ──────────────────────────── -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabMain"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="116dp"
+        android:layout_marginEnd="12dp"
+        android:src="@drawable/ic_add"
+        android:contentDescription="Tambah catatan"
+        app:backgroundTint="@color/button_primary"
+        app:tint="@android:color/white"
+        android:elevation="8dp"/>
+
+    <!-- ── Floating Bottom Navigation ─────────────────────────────── -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="12dp"
+        android:elevation="8dp">
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottomNav"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_nav_floating"
+            android:fitsSystemWindows="false"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            app:menu="@menu/bottom_nav_menu"
+            app:itemIconTint="@color/bottom_nav_icon_tint"
+            app:itemTextColor="@color/bottom_nav_color"
+            app:labelVisibilityMode="labeled"/>
+
+    </FrameLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

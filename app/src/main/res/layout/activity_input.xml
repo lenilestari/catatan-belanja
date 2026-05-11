@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_secondary">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="‹"
+            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            android:layout_marginEnd="12dp"
+            android:padding="4dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"/>
+
+        <TextView
+            android:id="@+id/tvCategoryBadge"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/bg_badge_blue"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="4dp"
+            android:textSize="12sp"
+            android:textColor="@color/accent_blue_text"
+            android:text="Bahan Makanan"/>
+    </LinearLayout>
+
+    <!-- Tab Pill -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:padding="16dp"
+        android:paddingTop="0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:background="@drawable/bg_tab_container"
+            android:padding="4dp">
+
+            <LinearLayout
+                android:id="@+id/tabVoice"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/bg_tab_active"
+                android:foreground="@drawable/bg_ripple_outline"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🎤 Voice"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_primary"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tabManual"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:foreground="@drawable/bg_ripple_outline"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="⌨️ Manual"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_secondary"/>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Voice Mode -->
+            <LinearLayout
+                android:id="@+id/layoutVoice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:gravity="center">
+
+                <!-- Mic Button -->
+                <LinearLayout
+                    android:id="@+id/btnMic"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:background="@drawable/bg_mic_idle"
+                    android:foreground="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center">
+                    <TextView
+                        android:id="@+id/tvMicIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🎤"
+                        android:textSize="40sp"/>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvRecordStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:textSize="13sp"
+                    android:textColor="@color/text_secondary"
+                    android:text="Tap mic untuk mulai"/>
+
+                <!-- Didengar Box -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_card"
+                    android:padding="14dp"
+                    android:layout_marginTop="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="DIDENGAR"
+                        android:textSize="10sp"
+                        android:textColor="@color/text_caption"
+                        android:letterSpacing="0.05"
+                        android:layout_marginBottom="8dp"/>
+
+                    <EditText
+                        android:id="@+id/etVoiceResult"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="60dp"
+                        android:background="@null"
+                        android:textSize="15sp"
+                        android:textColor="@color/text_primary"
+                        android:hint="Hasil voice akan muncul di sini..."
+                        android:textColorHint="@color/text_caption"
+                        android:gravity="top"
+                        android:inputType="textMultiLine"/>
+                </LinearLayout>
+
+                <!-- Ulang + Tambah -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="12dp">
+
+                    <LinearLayout
+                        android:id="@+id/btnUlang"
+                        android:layout_width="0dp"
+                        android:layout_height="44dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="6dp"
+                        android:background="@drawable/bg_button_outline"
+                        android:foreground="@drawable/bg_ripple_outline"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="↺ Ulang"
+                            android:textSize="14sp"
+                            android:textColor="@color/text_primary"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/btnTambah"
+                        android:layout_width="0dp"
+                        android:layout_height="44dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        android:background="@drawable/bg_button_primary"
+                        android:foreground="@drawable/bg_ripple_primary"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="+ Tambah"
+                            android:textSize="14sp"
+                            android:textColor="@color/white"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Manual Mode -->
+            <LinearLayout
+                android:id="@+id/layoutManual"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="NAMA BARANG"
+                    android:textSize="11sp"
+                    android:textColor="@color/text_caption"
+                    android:letterSpacing="0.05"
+                    android:layout_marginBottom="6dp"/>
+
+                <EditText
+                    android:id="@+id/etItemName"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_input"
+                    android:paddingHorizontal="12dp"
+                    android:textSize="15sp"
+                    android:textColor="@color/text_primary"
+                    android:hint="Tomat"
+                    android:textColorHint="@color/text_caption"
+                    android:inputType="textCapWords"
+                    android:layout_marginBottom="12dp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="12dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="JUMLAH"
+                            android:textSize="11sp"
+                            android:textColor="@color/text_caption"
+                            android:letterSpacing="0.05"
+                            android:layout_marginBottom="6dp"/>
+
+                        <EditText
+                            android:id="@+id/etQty"
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
+                            android:background="@drawable/bg_input"
+                            android:paddingHorizontal="12dp"
+                            android:textSize="15sp"
+                            android:textColor="@color/text_primary"
+                            android:hint="1"
+                            android:textColorHint="@color/text_caption"
+                            android:inputType="numberDecimal"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="SATUAN"
+                            android:textSize="11sp"
+                            android:textColor="@color/text_caption"
+                            android:letterSpacing="0.05"
+                            android:layout_marginBottom="6dp"/>
+
+                        <Spinner
+                            android:id="@+id/spinnerUnit"
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
+                            android:background="@drawable/bg_input"
+                            android:paddingHorizontal="12dp"
+                            android:entries="@array/satuan_array"/>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="HARGA TOTAL"
+                    android:textSize="11sp"
+                    android:textColor="@color/text_caption"
+                    android:letterSpacing="0.05"
+                    android:layout_marginBottom="6dp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_input"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="12dp"
+                        android:text="Rp"
+                        android:textSize="15sp"
+                        android:textColor="@color/text_secondary"/>
+
+                    <EditText
+                        android:id="@+id/etPrice"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@null"
+                        android:paddingHorizontal="6dp"
+                        android:textSize="15sp"
+                        android:textColor="@color/text_primary"
+                        android:hint="0"
+                        android:textColorHint="@color/text_caption"
+                        android:inputType="number"/>
+                </LinearLayout>
+
+                <!-- Quick Amount Chips -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="16dp">
+
+                    <TextView android:id="@+id/chip5k"
+                        android:layout_width="0dp" android:layout_height="36dp"
+                        android:layout_weight="1" android:layout_marginEnd="6dp"
+                        android:background="@drawable/bg_chip"
+                        android:foreground="@drawable/bg_ripple_outline"
+                        android:clickable="true" android:focusable="true"
+                        android:gravity="center"
+                        android:text="+5.000" android:textSize="12sp" android:textColor="@color/text_primary"/>
+
+                    <TextView android:id="@+id/chip10k"
+                        android:layout_width="0dp" android:layout_height="36dp"
+                        android:layout_weight="1" android:layout_marginEnd="6dp"
+                        android:background="@drawable/bg_chip"
+                        android:foreground="@drawable/bg_ripple_outline"
+                        android:clickable="true" android:focusable="true"
+                        android:gravity="center"
+                        android:text="+10.000" android:textSize="12sp" android:textColor="@color/text_primary"/>
+
+                    <TextView android:id="@+id/chip20k"
+                        android:layout_width="0dp" android:layout_height="36dp"
+                        android:layout_weight="1" android:layout_marginEnd="6dp"
+                        android:background="@drawable/bg_chip"
+                        android:foreground="@drawable/bg_ripple_outline"
+                        android:clickable="true" android:focusable="true"
+                        android:gravity="center"
+                        android:text="+20.000" android:textSize="12sp" android:textColor="@color/text_primary"/>
+
+                    <TextView android:id="@+id/chip50k"
+                        android:layout_width="0dp" android:layout_height="36dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_chip"
+                        android:foreground="@drawable/bg_ripple_outline"
+                        android:clickable="true" android:focusable="true"
+                        android:gravity="center"
+                        android:text="+50.000" android:textSize="12sp" android:textColor="@color/text_primary"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/btnTambahManual"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:background="@drawable/bg_button_primary"
+                    android:foreground="@drawable/bg_ripple_primary"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center">
+                    <TextView
+                        android:id="@+id/tvBtnTambahManual"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="+ Tambah ke list"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/white"/>
+                    <ProgressBar
+                        android:id="@+id/pbBtnTambahManual"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginStart="8dp"
+                        android:indeterminateTint="@color/white"
+                        android:visibility="gone"/>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Sticky Footer -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:padding="16dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/tvInputCount"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:text="0 input ditambahkan"/>
+
+        <LinearLayout
+            android:id="@+id/btnLihatList"
+            android:layout_width="wrap_content"
+            android:layout_height="44dp"
+            android:background="@drawable/bg_button_primary"
+            android:foreground="@drawable/bg_ripple_primary"
+            android:clickable="true"
+            android:focusable="true"
+            android:paddingHorizontal="20dp"
+            android:gravity="center">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Lihat list →"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"/>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

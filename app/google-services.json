@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "841691081121",
+    "project_id": "aethersea-562a6",
+    "storage_bucket": "aethersea-562a6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:841691081121:android:91a870bed0ad6ca47f43e0",
+        "android_client_info": {
+          "package_name": "com.lenilestari.aethersea"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "841691081121-nh6nbd1opfo4lss5l3jqgasarp8p202p.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.lenilestari.aethersea",
+            "certificate_hash": "75c7e339cb0856af8a39b63579fc60196823bd7c"
+          }
+        },
+        {
+          "client_id": "841691081121-mjm2b6quo19qfqjjjb8ac1cget4do64o.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAgZjNL9u9GIwshaNA64SmYqX1cpu_TbuM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "841691081121-mjm2b6quo19qfqjjjb8ac1cget4do64o.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
