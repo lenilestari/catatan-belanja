@@ -20,13 +20,13 @@ import com.lenilestari.aethersea.databinding.ActivityResultBinding
 import com.lenilestari.aethersea.processor.VoiceBatchManager
 import com.lenilestari.aethersea.ui.adapters.ParsedItemAdapter
 import com.lenilestari.aethersea.ui.home.MainActivity
+import com.lenilestari.aethersea.util.AppLogger
 import com.lenilestari.aethersea.util.Constants
 import com.lenilestari.aethersea.util.CurrencyUtils
 import com.lenilestari.aethersea.util.setBtnLoading
 import com.lenilestari.aethersea.util.showSnackbar
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
 import java.util.Date
 
 class ResultActivity : AppCompatActivity() {
@@ -107,24 +107,25 @@ class ResultActivity : AppCompatActivity() {
         var didNavigate = false
         lifecycleScope.launch {
             try {
+                val ts = Timestamp(Date(selectedDate))
+                val period = budgetCalc.periodFromTimestamp(ts)
                 val session = ShoppingSession(
-                    date = Timestamp(Date(selectedDate)),
+                    date = ts,
+                    period = period,
                     mainCategoryId = mainCategoryId,
                     mainCategoryName = mainCategoryName,
                     subCategoryId = subCategoryId,
                     subCategoryName = subCategoryName,
                     items = finalItems,
-                    grandTotal = total,
-                    createdAt = Timestamp.now()
+                    grandTotal = total
                 )
                 val result = sessionRepo.addSession(session)
                 if (result.isSuccess) {
-                    // Recalculate diberi batas waktu — tidak boleh block navigasi
-                    try {
-                        withTimeoutOrNull(5_000L) { budgetCalc.recalculateCurrentMonth() }
-                    } catch (e: CancellationException) {
-                        throw e  // wajib re-throw agar structured concurrency tidak rusak
-                    } catch (_: Exception) {}
+                    // Recalculate fire-and-forget — jangan block navigasi
+                    @OptIn(kotlinx.coroutines.DelicateCoroutinesApi::class)
+                    kotlinx.coroutines.GlobalScope.launch {
+                        runCatching { budgetCalc.recalculateCurrentMonth() }
+                    }
                     showSnackbar(binding.root, "✓ Belanja berhasil disimpan!")
                     kotlinx.coroutines.delay(800)
                     didNavigate = true
@@ -134,13 +135,13 @@ class ResultActivity : AppCompatActivity() {
                     finish()
                 } else {
                     val errMsg = result.exceptionOrNull()?.message ?: "unknown"
-                    android.util.Log.e("ResultActivity", "addSession failed: $errMsg")
+                    AppLogger.e("ResultActivity", "addSession failed: $errMsg")
                     showSnackbar(binding.root, "Gagal menyimpan: $errMsg", isError = true)
                 }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                android.util.Log.e("ResultActivity", "simpanSession crash: ${e.message}", e)
+                AppLogger.e("ResultActivity", "simpanSession crash", e)
                 showSnackbar(binding.root, "Error: ${e.message ?: "coba lagi"}", isError = true)
             } finally {
                 // Selalu reset loading kecuali sudah navigasi — activity tetap aman di-call finish()

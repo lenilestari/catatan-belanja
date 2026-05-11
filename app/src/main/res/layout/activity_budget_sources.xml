@@ -203,6 +203,30 @@
                 android:layout_marginBottom="8dp"
                 android:visibility="invisible"/>
 
+            <!-- Empty state sumber budget -->
+            <LinearLayout
+                android:id="@+id/layoutEmptySources"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="24dp"
+                android:visibility="gone">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="💰"
+                    android:textSize="36sp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Belum ada sumber budget bulan ini"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_secondary"
+                    android:gravity="center"/>
+            </LinearLayout>
+
             <LinearLayout
                 android:id="@+id/btnTambahSource"
                 android:layout_width="match_parent"
@@ -216,6 +240,7 @@
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:text="+ Tambah sumber budget" android:textSize="14sp" android:textColor="@color/text_secondary"/>
             </LinearLayout>
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

@@ -14,7 +14,8 @@ data class MonthlyBudget(
     val leftAmount: Long = 0L,
     val isClosed: Boolean = false,
     val carriedToNext: Long = 0L,
-    val closedAt: Timestamp? = null
+    val closedAt: Timestamp? = null,
+    val updatedAt: Timestamp = Timestamp(0, 0)
 ) : Serializable
 
 data class MonthSummary(

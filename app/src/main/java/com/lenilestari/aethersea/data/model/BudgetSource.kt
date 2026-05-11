@@ -10,5 +10,6 @@ data class BudgetSource(
     val period: String = "",
     val receivedDate: Timestamp = Timestamp(0, 0),
     val note: String = "",
-    val createdAt: Timestamp = Timestamp(0, 0)
+    val createdAt: Timestamp = Timestamp(0, 0),
+    val updatedAt: Timestamp = Timestamp(0, 0)
 ) : Serializable

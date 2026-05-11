@@ -30,14 +30,19 @@ import com.lenilestari.aethersea.ui.wishlist.WishlistActivity
 import com.lenilestari.aethersea.util.CurrencyUtils
 import com.lenilestari.aethersea.util.DateUtils
 import com.lenilestari.aethersea.util.disableActiveIndicator
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withTimeoutOrNull
 
 class ProfileActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityProfileBinding
     private lateinit var authManager: AuthManager
     private var userId: String = ""
+    private var uploadJob: Job? = null
+    private var loadProfileJob: Job? = null
 
     private val pickPhoto = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         if (uri != null) uploadPhoto(uri)
@@ -68,6 +73,12 @@ class ProfileActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         binding.bottomNav.selectedItemId = R.id.nav_profile
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        uploadJob?.cancel()
+        loadProfileJob?.cancel()
     }
 
     private fun confirmLogout() {
@@ -135,7 +146,8 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun loadProfile() {
-        lifecycleScope.launch {
+        loadProfileJob?.cancel()
+        loadProfileJob = lifecycleScope.launch {
             val fbUser = authManager.currentUser
             val user = UserRepository(userId).getProfile()
 
@@ -180,19 +192,64 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun uploadPhoto(uri: Uri) {
+        if (uploadJob?.isActive == true) return
         val storageRef = FirebaseStorage.getInstance()
             .reference.child("avatars/$userId.jpg")
-        lifecycleScope.launch {
+        uploadJob = lifecycleScope.launch {
+            var tempFile: java.io.File? = null
             try {
                 binding.layoutAvatar.isClickable = false
-                storageRef.putFile(uri).await()
-                val downloadUrl = storageRef.downloadUrl.await().toString()
-                UserRepository(userId).updatePhotoUrl(downloadUrl)
+                binding.ivAvatarProgress?.visibility = View.VISIBLE
+
+                // Salin + compress URI ke file sementara (mencegah expired SAF URI + OOM)
+                tempFile = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                    val inputStream = contentResolver.openInputStream(uri)
+                        ?: throw Exception("Tidak bisa membuka file foto")
+                    val tmp = java.io.File(cacheDir, "avatar_${System.currentTimeMillis()}.jpg")
+                    // Compress ke max 1024px dan quality 85 untuk hemat storage
+                    val originalBytes = inputStream.use { it.readBytes() }
+                    if (originalBytes.size > 2 * 1024 * 1024) {
+                        // Hanya resize jika > 2MB
+                        val bmp = android.graphics.BitmapFactory.decodeByteArray(originalBytes, 0, originalBytes.size)
+                            ?: throw Exception("File bukan gambar valid")
+                        val maxSide = 1024
+                        val ratio = minOf(maxSide.toFloat() / bmp.width, maxSide.toFloat() / bmp.height)
+                        val scaled = if (ratio < 1f) {
+                            android.graphics.Bitmap.createScaledBitmap(bmp, (bmp.width * ratio).toInt(), (bmp.height * ratio).toInt(), true)
+                                .also { if (it != bmp) bmp.recycle() }
+                        } else bmp
+                        tmp.outputStream().use { scaled.compress(android.graphics.Bitmap.CompressFormat.JPEG, 85, it) }
+                        scaled.recycle()
+                    } else {
+                        tmp.writeBytes(originalBytes)
+                    }
+                    tmp
+                }
+
+                val metadata = com.google.firebase.storage.StorageMetadata.Builder()
+                    .setContentType("image/jpeg").build()
+
+                val uploadResult = withTimeoutOrNull(30_000L) {
+                    storageRef.putFile(android.net.Uri.fromFile(tempFile), metadata).await()
+                }
+                if (uploadResult == null) throw Exception("Upload timeout, coba lagi dengan koneksi lebih stabil")
+
+                val downloadUrl = withTimeoutOrNull(10_000L) {
+                    storageRef.downloadUrl.await().toString()
+                } ?: throw Exception("Gagal mendapatkan URL foto")
+
+                withTimeoutOrNull(8_000L) { UserRepository(userId).updatePhotoUrl(downloadUrl) }
                 showAvatar(downloadUrl)
+                Toast.makeText(this@ProfileActivity, "Foto profil berhasil diperbarui", Toast.LENGTH_SHORT).show()
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
-                Toast.makeText(this@ProfileActivity, "Gagal upload foto", Toast.LENGTH_SHORT).show()
+                android.util.Log.e("ProfileActivity", "Upload foto gagal", e)
+                Toast.makeText(this@ProfileActivity, "Gagal upload: ${e.message ?: "coba lagi"}", Toast.LENGTH_SHORT).show()
             } finally {
+                tempFile?.delete()
                 binding.layoutAvatar.isClickable = true
+                binding.ivAvatarProgress?.visibility = View.GONE
             }
         }
     }

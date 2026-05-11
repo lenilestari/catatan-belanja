@@ -77,6 +77,15 @@
                             android:background="@drawable/bg_badge_blue"
                             android:visibility="gone"/>
 
+                        <!-- Upload progress overlay -->
+                        <ProgressBar
+                            android:id="@+id/ivAvatarProgress"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:layout_gravity="center"
+                            android:visibility="gone"
+                            android:indeterminateTint="@android:color/white"/>
+
                         <!-- Camera badge -->
                         <LinearLayout
                             android:layout_width="28dp"

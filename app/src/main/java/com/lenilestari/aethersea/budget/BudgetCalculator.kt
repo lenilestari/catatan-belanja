@@ -6,6 +6,7 @@ import com.lenilestari.aethersea.data.model.MonthSummary
 import com.lenilestari.aethersea.data.repository.BudgetSourceRepository
 import com.lenilestari.aethersea.data.repository.MonthlyBudgetRepository
 import com.lenilestari.aethersea.data.repository.SessionRepository
+import com.lenilestari.aethersea.util.AppLogger
 import java.util.Calendar
 import kotlin.math.roundToLong
 
@@ -14,11 +15,13 @@ class BudgetCalculator(
     private val sessionRepo: SessionRepository,
     private val monthlyBudgetRepo: MonthlyBudgetRepository
 ) {
+    private companion object { const val TAG = "BudgetCalculator" }
+
     suspend fun rolloverPreviousMonths() {
         val currentPeriod = getCurrentPeriod()
-        android.util.Log.d("DBG_AETHER", "   rollover: currentPeriod=$currentPeriod → getOpenMonths...")
+        AppLogger.d(TAG, "rollover: currentPeriod=$currentPeriod → getOpenMonths")
         val openMonths = monthlyBudgetRepo.getOpenMonths()
-        android.util.Log.d("DBG_AETHER", "   rollover: openMonths=${openMonths.size}")
+        AppLogger.d(TAG, "rollover: openMonths=${openMonths.size}")
 
         for (month in openMonths.sortedBy { it.period }) {
             if (month.period >= currentPeriod) continue
@@ -31,7 +34,6 @@ class BudgetCalculator(
             val totalBudget = sources + carryOver
             val left = totalBudget - spending
 
-            // Jika close gagal (timeout), jangan propagate carry-over — hindari double carry-over
             val closeResult = monthlyBudgetRepo.update(month.copy(
                 totalSourcesAmount = sources,
                 totalSpending = spending,
@@ -42,7 +44,7 @@ class BudgetCalculator(
                 closedAt = Timestamp.now()
             ))
             if (closeResult.isFailure) {
-                android.util.Log.w("DBG_AETHER", "   rollover: gagal close ${month.period}, skip carry-over")
+                AppLogger.w(TAG, "rollover: gagal close ${month.period}, skip carry-over")
                 continue
             }
 
@@ -58,11 +60,10 @@ class BudgetCalculator(
 
     suspend fun ensureCurrentMonthExists() {
         val period = getCurrentPeriod()
-        android.util.Log.d("DBG_AETHER", "   ensureCurrent: get($period)...")
+        AppLogger.d(TAG, "ensureCurrent: get($period)")
         val existing = monthlyBudgetRepo.get(period)
-        android.util.Log.d("DBG_AETHER", "   ensureCurrent: existing=${existing?.period ?: "NULL"}")
         if (existing == null) {
-            android.util.Log.d("DBG_AETHER", "   ensureCurrent: create new month...")
+            AppLogger.d(TAG, "ensureCurrent: not found → creating")
             val (start, end) = getMonthBoundaries(period)
             val result = monthlyBudgetRepo.create(MonthlyBudget(
                 period = period,
@@ -70,27 +71,26 @@ class BudgetCalculator(
                 endDate = end,
                 isClosed = false
             ))
-            android.util.Log.d("DBG_AETHER", "   ensureCurrent: create=${if (result.isSuccess) "OK" else "FAIL: ${result.exceptionOrNull()?.message}"}")
+            AppLogger.d(TAG, "ensureCurrent: create=${if (result.isSuccess) "OK" else "FAIL: ${result.exceptionOrNull()?.message}"}")
+        } else {
+            AppLogger.d(TAG, "ensureCurrent: already exists period=${existing.period}")
         }
     }
 
     suspend fun recalculateCurrentMonth() {
         val period = getCurrentPeriod()
-        android.util.Log.d("DBG_AETHER", "   recalculate: period=$period")
+        AppLogger.d(TAG, "recalculate: period=$period")
         val (start, end) = getMonthBoundaries(period)
-        android.util.Log.d("DBG_AETHER", "   recalculate: getByPeriod start")
         val sources = budgetSourceRepo.getByPeriod(period).sumOf { it.amount }
-        android.util.Log.d("DBG_AETHER", "   recalculate: sources=$sources → getSessionsInRange start")
         val spending = sessionRepo.getSessionsInRange(start, end)
             .sumOf { it.grandTotal }.roundToLong()
-        android.util.Log.d("DBG_AETHER", "   recalculate: spending=$spending → getOrCreate start")
+        AppLogger.d(TAG, "recalculate: sources=$sources spending=$spending")
         val month = monthlyBudgetRepo.getOrCreate(period)
-        android.util.Log.d("DBG_AETHER", "   recalculate: getOrCreate done → update start")
         val carryOver = month.carryOverFromPrevious
         val totalBudget = sources + carryOver
         val left = totalBudget - spending
 
-        val updateResult = monthlyBudgetRepo.update(month.copy(
+        val result = monthlyBudgetRepo.update(month.copy(
             totalSourcesAmount = sources,
             totalSpending = spending,
             totalBudget = totalBudget,
@@ -98,10 +98,11 @@ class BudgetCalculator(
             startDate = month.startDate ?: start,
             endDate = month.endDate ?: end
         ))
-        android.util.Log.d("DBG_AETHER", "   recalculate: update result=${if (updateResult.isSuccess) "OK" else "FAIL: ${updateResult.exceptionOrNull()?.message}"}")
+        AppLogger.d(TAG, "recalculate: update=${if (result.isSuccess) "OK" else "FAIL: ${result.exceptionOrNull()?.message}"}")
     }
 
     suspend fun recalculateForPeriod(period: String) {
+        AppLogger.d(TAG, "recalculateForPeriod: period=$period")
         val (start, end) = getMonthBoundaries(period)
         val sources = budgetSourceRepo.getByPeriod(period).sumOf { it.amount }
         val spending = sessionRepo.getSessionsInRange(start, end)
@@ -119,13 +120,11 @@ class BudgetCalculator(
     }
 
     suspend fun getCurrentMonthSummary(): MonthSummary {
-        // READ ONLY — tidak boleh write saat UI load
-        // recalculateCurrentMonth() dipanggil hanya setelah save/delete session
         val period = getCurrentPeriod()
-        android.util.Log.d("DBG_AETHER", "   getCurrentMonthSummary: read only, period=$period")
+        AppLogger.d(TAG, "getCurrentMonthSummary: period=$period")
         val month = monthlyBudgetRepo.get(period) ?: return MonthSummary(period = period)
         val sourcesCount = budgetSourceRepo.getByPeriod(period).size
-        android.util.Log.d("DBG_AETHER", "   getCurrentMonthSummary: done budget=${month.totalBudget}")
+        AppLogger.d(TAG, "getCurrentMonthSummary: budget=${month.totalBudget} spending=${month.totalSpending}")
         return MonthSummary(
             period = period,
             totalBudget = month.totalBudget,
@@ -183,7 +182,6 @@ class BudgetCalculator(
 
     fun formatPeriodDisplay(period: String): String {
         val (year, month) = period.split("-").map { it.toInt() }
-        val cal = Calendar.getInstance().apply { set(year, month - 1, 1) }
         val monthNames = arrayOf("Januari", "Februari", "Maret", "April", "Mei", "Juni",
             "Juli", "Agustus", "September", "Oktober", "November", "Desember")
         return "${monthNames[month - 1]} $year"

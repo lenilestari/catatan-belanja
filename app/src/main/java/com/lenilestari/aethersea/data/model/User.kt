@@ -8,5 +8,6 @@ data class User(
     val email: String = "",
     val photoUrl: String = "",
     val createdAt: Timestamp = Timestamp.now(),
+    val updatedAt: Timestamp = Timestamp.now(),
     val lastResetAt: Timestamp? = null
 )

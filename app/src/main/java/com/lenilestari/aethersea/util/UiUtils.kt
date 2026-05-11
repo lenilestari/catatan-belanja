@@ -29,6 +29,11 @@ fun hideShimmerList(shimmer: View, list: View) {
     list.visibility = View.VISIBLE
 }
 
+fun hideShimmerOnly(shimmer: View) {
+    shimmer.stopShimmer()
+    shimmer.visibility = View.GONE
+}
+
 fun setBtnLoading(btn: View, tvLabel: TextView, pb: ProgressBar, loading: Boolean) {
     btn.isClickable = !loading
     btn.alpha = if (loading) 0.65f else 1f
@@ -36,7 +41,14 @@ fun setBtnLoading(btn: View, tvLabel: TextView, pb: ProgressBar, loading: Boolea
     pb.visibility = if (loading) View.VISIBLE else View.GONE
 }
 
-fun showSnackbar(anchor: View, message: String, isError: Boolean = false) {
+fun showSnackbar(
+    anchor: View,
+    message: String,
+    isError: Boolean = false,
+    anchorView: View? = null,
+    actionLabel: String? = null,
+    onAction: (() -> Unit)? = null
+) {
     val snackbar = Snackbar.make(anchor, message, Snackbar.LENGTH_LONG)
     if (isError) {
         snackbar.setBackgroundTint(ContextCompat.getColor(anchor.context, R.color.danger_text))
@@ -44,6 +56,12 @@ fun showSnackbar(anchor: View, message: String, isError: Boolean = false) {
     } else {
         snackbar.setBackgroundTint(ContextCompat.getColor(anchor.context, R.color.success_text))
         snackbar.setTextColor(ContextCompat.getColor(anchor.context, R.color.white))
+    }
+    // Angkat snackbar di atas bottom navigation jika ada
+    if (anchorView != null) snackbar.anchorView = anchorView
+    if (actionLabel != null && onAction != null) {
+        snackbar.setAction(actionLabel) { onAction() }
+        snackbar.setActionTextColor(ContextCompat.getColor(anchor.context, R.color.white))
     }
     snackbar.show()
 }

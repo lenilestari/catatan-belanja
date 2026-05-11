@@ -32,6 +32,7 @@ import com.lenilestari.aethersea.ui.profile.ProfileActivity
 import com.lenilestari.aethersea.ui.wishlist.AddWishlistActivity
 import com.lenilestari.aethersea.ui.wishlist.WishlistActivity
 import com.lenilestari.aethersea.ui.wishlist.WishlistDetailActivity
+import com.lenilestari.aethersea.util.AppLogger
 import com.lenilestari.aethersea.util.CleanupScheduler
 import com.lenilestari.aethersea.util.Constants
 import com.lenilestari.aethersea.util.CurrencyUtils
@@ -66,6 +67,8 @@ class MainActivity : AppCompatActivity() {
     private var shimmerShownAt = 0L
     private var isFirstLoad = true
     private var loadJob: Job? = null
+    private var startupJob: Job? = null
+    private var navJob: Job? = null
     private var isSpeedDialOpen = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -95,22 +98,17 @@ class MainActivity : AppCompatActivity() {
         triggerLoad()
 
         if (savedInstanceState == null) {
-            // Rollover + seed jalan paralel di background — setelah selesai reload
-            lifecycleScope.launch {
-                android.util.Log.d("DBG_AETHER", "── STARTUP BG: rolloverPreviousMonths...")
+            startupJob = lifecycleScope.launch {
                 try {
                     budgetCalculator.rolloverPreviousMonths()
-                    android.util.Log.d("DBG_AETHER", "── STARTUP BG: rolloverPreviousMonths OK")
                     categoryRepo.seedDefaultsIfNeeded()
-                    android.util.Log.d("DBG_AETHER", "── STARTUP BG: seedDefaultsIfNeeded OK → reload")
-                    // Reload setelah seed agar kategori muncul
                     triggerLoad()
-                    val cleanup = CleanupScheduler(this@MainActivity, userRepo, sessionRepo,
-                        wishlistRepo, budgetSourceRepo, monthlyBudgetRepo)
-                    cleanup.checkAndCleanup()
-                    android.util.Log.d("DBG_AETHER", "── STARTUP BG: cleanup OK")
+                    CleanupScheduler(this@MainActivity, userRepo, sessionRepo,
+                        wishlistRepo, budgetSourceRepo, monthlyBudgetRepo).checkAndCleanup()
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    throw e
                 } catch (e: Exception) {
-                    android.util.Log.e("DBG_AETHER", "── STARTUP BG: EXCEPTION ${e::class.simpleName}: ${e.message}", e)
+                    com.lenilestari.aethersea.util.AppLogger.e("MainActivity", "Startup bg error", e)
                 }
             }
         }
@@ -133,6 +131,8 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         loadJob?.cancel()
+        startupJob?.cancel()
+        navJob?.cancel()
     }
 
     private fun triggerLoad() {
@@ -168,8 +168,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun navigateToCategory(category: Category) {
+        if (navJob?.isActive == true) return
         setFabLoading(true)
-        lifecycleScope.launch {
+        navJob = lifecycleScope.launch {
             try {
                 val hasSub = categoryRepo.hasSubCategories(category.id)
                 if (hasSub) {
@@ -186,6 +187,8 @@ class MainActivity : AppCompatActivity() {
                         putExtra(Constants.EXTRA_SELECTED_DATE, selectedDate)
                     })
                 }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
             } catch (e: Exception) {
                 showSnackbar(binding.root, "Gagal membuka kategori", isError = true)
             } finally {
@@ -340,75 +343,47 @@ class MainActivity : AppCompatActivity() {
     }
 
     private suspend fun loadData() {
-        android.util.Log.d("DBG_AETHER", "── loadData() START")
         try {
             val loadSuccess = withTimeoutOrNull(10_000L) {
                 coroutineScope {
-                    val categoriesDeferred = async {
-                        android.util.Log.d("DBG_AETHER", "   [async] getMainCategories start")
-                        val r = categoryRepo.getMainCategories()
-                        android.util.Log.d("DBG_AETHER", "   [async] getMainCategories done → ${r.size} item")
-                        r
-                    }
-                    val summaryDeferred = async {
-                        android.util.Log.d("DBG_AETHER", "   [async] getCurrentMonthSummary start")
-                        val r = budgetCalculator.getCurrentMonthSummary()
-                        android.util.Log.d("DBG_AETHER", "   [async] getCurrentMonthSummary done → budget=${r.totalBudget}")
-                        r
-                    }
-                    val wishlistsDeferred = async {
-                        android.util.Log.d("DBG_AETHER", "   [async] wishlist.getAll start")
-                        val r = wishlistRepo.getAll()
-                        android.util.Log.d("DBG_AETHER", "   [async] wishlist.getAll done → ${r.size} item")
-                        r
-                    }
+                    val categoriesDeferred = async { categoryRepo.getMainCategories() }
+                    val summaryDeferred = async { budgetCalculator.getCurrentMonthSummary() }
+                    val wishlistsDeferred = async { wishlistRepo.getAll() }
 
                     val categories = categoriesDeferred.await()
-                    android.util.Log.d("DBG_AETHER", "── categories await OK: ${categories.size} kategori")
                     categoryAdapter.submitList(categories)
 
                     val summary = summaryDeferred.await()
-                    android.util.Log.d("DBG_AETHER", "── summary await OK")
                     binding.tvBudget.text = CurrencyUtils.format(summary.totalBudget)
                     binding.tvSpending.text = CurrencyUtils.format(summary.totalSpending)
                     binding.tvLeft.text = CurrencyUtils.format(summary.leftAmount)
                     val leftColor = if (summary.leftAmount >= 0) R.color.success_text else R.color.danger_text
                     binding.tvLeft.setTextColor(ContextCompat.getColor(this@MainActivity, leftColor))
 
-                    android.util.Log.d("DBG_AETHER", "── getSessionsThisMonth start")
                     val (start, _) = budgetCalculator.getMonthBoundaries(budgetCalculator.getCurrentPeriod())
                     val sessions = sessionRepo.getSessionsThisMonth(start)
-                    android.util.Log.d("DBG_AETHER", "── getSessionsThisMonth done → ${sessions.size} sesi")
                     binding.tvTotalBulan.text = CurrencyUtils.format(sessions.sumOf { it.grandTotal })
                     binding.tvSessionCount.text = "📈 ${sessions.size} sesi"
 
                     val wishlists = wishlistsDeferred.await().take(2)
-                    android.util.Log.d("DBG_AETHER", "── wishlists await OK: ${wishlists.size} item")
                     wishlistAdapter.submitList(wishlists)
                 }
                 true
             }
 
             if (loadSuccess == null) {
-                android.util.Log.w("DBG_AETHER", "── loadData() TIMEOUT (>10 detik)")
+                AppLogger.timeout("MainActivity", "loadData", 10_000L)
                 showSnackbar(binding.root, "Koneksi lambat, coba refresh", isError = true)
-            } else {
-                if (isFirstLoad) {
-                    val elapsed = System.currentTimeMillis() - shimmerShownAt
-                    val remaining = 300L - elapsed
-                    if (remaining > 0) delay(remaining)
-                }
-                android.util.Log.d("DBG_AETHER", "── loadData() SUCCESS → shimmer akan disembunyikan")
+            } else if (isFirstLoad) {
+                val elapsed = System.currentTimeMillis() - shimmerShownAt
+                val remaining = 300L - elapsed
+                if (remaining > 0) delay(remaining)
             }
         } catch (e: Exception) {
-            if (e is CancellationException) {
-                android.util.Log.w("DBG_AETHER", "── loadData() CANCELLED")
-                throw e
-            }
-            android.util.Log.e("DBG_AETHER", "── loadData() ERROR: ${e::class.simpleName}: ${e.message}", e)
+            if (e is CancellationException) throw e
+            AppLogger.e("MainActivity", "loadData error", e)
             showSnackbar(binding.root, "Gagal memuat data, coba lagi", isError = true)
         } finally {
-            android.util.Log.d("DBG_AETHER", "── loadData() finally → hideShimmer")
             isFirstLoad = false
             hideShimmerList(binding.shimmerCategories, binding.rvCategories)
             hideShimmerList(binding.shimmerWishlists, binding.rvWishlists)

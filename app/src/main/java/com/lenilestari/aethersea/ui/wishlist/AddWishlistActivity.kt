@@ -23,6 +23,7 @@ class AddWishlistActivity : AppCompatActivity() {
     private var targetRaw = 0L
     private var savedRaw = 0L
     private var monthlyRaw = 0L
+    private var saveJob: kotlinx.coroutines.Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,10 +48,10 @@ class AddWishlistActivity : AppCompatActivity() {
         binding.chip500k.setOnClickListener { addToField(binding.etMonthly, 500000L) { monthlyRaw = it; updateEstimasi() } }
         binding.chip1m.setOnClickListener { addToField(binding.etMonthly, 1000000L) { monthlyRaw = it; updateEstimasi() } }
 
-        binding.btnBatal.setOnClickListener { finish() }
+        binding.btnBatal.setOnClickListener { cancelAndFinish() }
         binding.btnSimpan.setOnClickListener { simpan() }
         binding.btnHapus.setOnClickListener { hapus() }
-        binding.btnBack.setOnClickListener { finish() }
+        binding.btnBack.setOnClickListener { cancelAndFinish() }
     }
 
     private fun setupWatcher(et: android.widget.EditText, onChanged: (Long) -> Unit) {
@@ -100,28 +101,48 @@ class AddWishlistActivity : AppCompatActivity() {
         updateEstimasi()
     }
 
+    private fun cancelAndFinish() {
+        saveJob?.cancel()
+        finish()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        saveJob?.cancel()
+    }
+
     private fun simpan() {
         val name = binding.etName.text.toString().trim()
         if (name.isEmpty()) { Toast.makeText(this, "Nama harus diisi", Toast.LENGTH_SHORT).show(); return }
         if (targetRaw == 0L) { Toast.makeText(this, "Harga target harus diisi", Toast.LENGTH_SHORT).show(); return }
+        if (saveJob?.isActive == true) return
 
         setBtnLoading(binding.btnSimpan, binding.tvBtnSimpan, binding.pbBtnSimpan, true)
-        lifecycleScope.launch {
-            val wishlist = Wishlist(
-                id = editingId ?: "",
-                name = name,
-                targetPrice = targetRaw.toDouble(),
-                savedAmount = savedRaw.toDouble(),
-                monthlyTarget = monthlyRaw.toDouble(),
-                createdAt = Timestamp.now()
-            )
-            val result = if (editingId != null) wishlistRepo.update(wishlist) else wishlistRepo.add(wishlist).map { }
-            if (result.isSuccess) {
-                Toast.makeText(this@AddWishlistActivity, "Wishlist tersimpan!", Toast.LENGTH_SHORT).show()
-                finish()
-            } else {
-                setBtnLoading(binding.btnSimpan, binding.tvBtnSimpan, binding.pbBtnSimpan, false)
-                Toast.makeText(this@AddWishlistActivity, "Gagal menyimpan", Toast.LENGTH_SHORT).show()
+        var didFinish = false
+        saveJob = lifecycleScope.launch {
+            try {
+                val wishlist = Wishlist(
+                    id = editingId ?: "",
+                    name = name,
+                    targetPrice = targetRaw.toDouble(),
+                    savedAmount = savedRaw.toDouble(),
+                    monthlyTarget = monthlyRaw.toDouble(),
+                    createdAt = Timestamp.now()
+                )
+                val result = if (editingId != null) wishlistRepo.update(wishlist) else wishlistRepo.add(wishlist).map { }
+                if (result.isSuccess) {
+                    Toast.makeText(this@AddWishlistActivity, "Wishlist tersimpan!", Toast.LENGTH_SHORT).show()
+                    didFinish = true
+                    finish()
+                } else {
+                    Toast.makeText(this@AddWishlistActivity, "Gagal menyimpan", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Toast.makeText(this@AddWishlistActivity, "Error: ${e.message ?: "coba lagi"}", Toast.LENGTH_SHORT).show()
+            } finally {
+                if (!didFinish) setBtnLoading(binding.btnSimpan, binding.tvBtnSimpan, binding.pbBtnSimpan, false)
             }
         }
     }
@@ -133,8 +154,18 @@ class AddWishlistActivity : AppCompatActivity() {
             .setMessage("Hapus wishlist ini?")
             .setPositiveButton("Ya") { _, _ ->
                 lifecycleScope.launch {
-                    wishlistRepo.delete(id)
-                    finish()
+                    try {
+                        val result = wishlistRepo.delete(id)
+                        if (result.isSuccess) {
+                            finish()
+                        } else {
+                            Toast.makeText(this@AddWishlistActivity, "Gagal menghapus wishlist", Toast.LENGTH_SHORT).show()
+                        }
+                    } catch (e: kotlinx.coroutines.CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        Toast.makeText(this@AddWishlistActivity, "Error: ${e.message ?: "coba lagi"}", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
             .setNegativeButton("Batal", null).show()

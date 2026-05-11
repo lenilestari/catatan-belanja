@@ -16,6 +16,7 @@ import com.lenilestari.aethersea.ui.home.MainActivity
 import com.lenilestari.aethersea.ui.profile.ProfileActivity
 import com.lenilestari.aethersea.util.disableActiveIndicator
 import com.lenilestari.aethersea.util.hideShimmerList
+import com.lenilestari.aethersea.util.hideShimmerOnly
 import com.lenilestari.aethersea.util.showShimmerList
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -40,7 +41,7 @@ class WishlistActivity : AppCompatActivity() {
 
         adapter = WishlistAdapter { wishlist ->
             startActivity(Intent(this, WishlistDetailActivity::class.java).apply {
-                putExtra("wishlistId", wishlist.id)
+                putExtra(com.lenilestari.aethersea.util.Constants.EXTRA_WISHLIST_ID, wishlist.id)
             })
         }
 
@@ -51,10 +52,12 @@ class WishlistActivity : AppCompatActivity() {
             startActivity(Intent(this, AddWishlistActivity::class.java))
         }
 
+        binding.swipeRefresh.setOnRefreshListener { loadData(forceRefresh = true) }
+        binding.btnRetry.setOnClickListener { loadData() }
 
         setupBottomNav()
         shimmerShownAt = System.currentTimeMillis()
-        showShimmerList(binding.shimmerContainer, binding.rvWishlists)
+        showShimmerList(binding.shimmerContainer, binding.swipeRefresh)
         loadData()
     }
 
@@ -64,10 +67,24 @@ class WishlistActivity : AppCompatActivity() {
         if (!isFirstLoad) loadData()
     }
 
-    private fun loadData() {
+    override fun onStop() {
+        super.onStop()
+        // Bersihkan SwipeRefresh indicator agar tidak stuck saat kembali
+        binding.swipeRefresh.isRefreshing = false
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        loadJob?.cancel()
+    }
+
+    private fun loadData(forceRefresh: Boolean = false) {
         loadJob?.cancel()
         loadJob = lifecycleScope.launch {
             try {
+                if (!forceRefresh && isFirstLoad) {
+                    showShimmerList(binding.shimmerContainer, binding.swipeRefresh)
+                }
                 val wishlists = repo.getAll()
 
                 if (isFirstLoad) {
@@ -77,17 +94,24 @@ class WishlistActivity : AppCompatActivity() {
                     isFirstLoad = false
                 }
 
-                hideShimmerList(binding.shimmerContainer, binding.rvWishlists)
+                hideShimmerOnly(binding.shimmerContainer)
+                binding.swipeRefresh.isRefreshing = false
                 adapter.submitList(wishlists)
 
                 binding.tvWishlistCount.text = "${wishlists.size} item"
-                binding.layoutEmpty.visibility = if (wishlists.isEmpty()) View.VISIBLE else View.GONE
-                binding.rvWishlists.visibility = if (wishlists.isEmpty()) View.INVISIBLE else View.VISIBLE
+                val hasData = wishlists.isNotEmpty()
+                binding.swipeRefresh.visibility = if (hasData) View.VISIBLE else View.GONE
+                binding.layoutEmpty.visibility = if (!hasData) View.VISIBLE else View.GONE
+                binding.layoutError.visibility = View.GONE
 
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                hideShimmerList(binding.shimmerContainer, binding.rvWishlists)
-                binding.layoutEmpty.visibility = View.VISIBLE
+                isFirstLoad = false
+                hideShimmerOnly(binding.shimmerContainer)
+                binding.swipeRefresh.isRefreshing = false
+                binding.swipeRefresh.visibility = View.GONE
+                binding.layoutEmpty.visibility = View.GONE
+                binding.layoutError.visibility = View.VISIBLE
             }
         }
     }

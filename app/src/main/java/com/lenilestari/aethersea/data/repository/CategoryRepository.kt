@@ -3,12 +3,14 @@ package com.lenilestari.aethersea.data.repository
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Source
 import com.lenilestari.aethersea.data.model.Category
+import com.lenilestari.aethersea.util.AppLogger
 import com.lenilestari.aethersea.util.Constants
 import kotlinx.coroutines.tasks.await
 
 class CategoryRepository(private val userId: String) {
     private val db = FirebaseFirestore.getInstance()
     private val collection = db.collection("users").document(userId).collection("categories")
+    private companion object { const val TAG = "CategoryRepo" }
 
     private val defaultMainCategories = listOf(
         Category(Constants.CAT_PRIBADI, "Catatan Pribadi", "👤", null, true, 0),
@@ -27,58 +29,58 @@ class CategoryRepository(private val userId: String) {
     )
 
     suspend fun seedDefaultsIfNeeded() {
-        android.util.Log.d("DBG_AETHER", "   seedDefaults: read cache...")
+        AppLogger.d(TAG, "seedDefaults: checking cache")
         val existing = try {
             val r = collection.whereEqualTo("isDefault", true).get(Source.CACHE).await()
-            android.util.Log.d("DBG_AETHER", "   seedDefaults: cache hit → ${r.size()} dok")
+            AppLogger.d(TAG, "seedDefaults: cache hit → ${r.size()} docs")
             r
         } catch (e1: Exception) {
-            android.util.Log.w("DBG_AETHER", "   seedDefaults: cache miss (${e1.message}) → server...")
+            AppLogger.w(TAG, "seedDefaults: cache miss → server")
             try {
                 val r = collection.whereEqualTo("isDefault", true).get().await()
-                android.util.Log.d("DBG_AETHER", "   seedDefaults: server hit → ${r.size()} dok")
+                AppLogger.d(TAG, "seedDefaults: server → ${r.size()} docs")
                 r
             } catch (e2: Exception) {
-                android.util.Log.e("DBG_AETHER", "   seedDefaults: server FAIL (${e2.message}) → skip")
+                AppLogger.e(TAG, "seedDefaults: server FAILED, skip", e2)
                 return
             }
         }
         if (existing.isEmpty) {
-            android.util.Log.d("DBG_AETHER", "   seedDefaults: kosong → menulis default kategori...")
+            AppLogger.d(TAG, "seedDefaults: empty → seeding defaults")
             try {
                 val batch = db.batch()
                 (defaultMainCategories + defaultSubCategories).forEach { cat ->
                     batch.set(collection.document(cat.id), cat)
                 }
                 batch.commit().await()
-                android.util.Log.d("DBG_AETHER", "   seedDefaults: batch commit OK")
+                AppLogger.d(TAG, "seedDefaults: batch commit OK")
             } catch (e: Exception) {
-                android.util.Log.e("DBG_AETHER", "   seedDefaults: batch commit FAIL → ${e.message}")
+                AppLogger.e(TAG, "seedDefaults: batch commit FAILED", e)
             }
         } else {
-            android.util.Log.d("DBG_AETHER", "   seedDefaults: sudah ada data, skip")
+            AppLogger.d(TAG, "seedDefaults: already seeded, skip")
         }
     }
 
     suspend fun getMainCategories(): List<Category> {
-        android.util.Log.d("DBG_AETHER", "   getMainCategories: read cache...")
+        AppLogger.d(TAG, "getMainCategories")
         val query = collection.whereEqualTo("parentId", null)
         return try {
-            val r = query.get(Source.CACHE).await()
+            val result = query.get(Source.CACHE).await()
                 .documents.mapNotNull { it.toObject(Category::class.java)?.copy(id = it.id) }
                 .sortedBy { it.sortOrder }
-            android.util.Log.d("DBG_AETHER", "   getMainCategories: cache → ${r.size} item")
-            r
+            AppLogger.d(TAG, "getMainCategories cache → ${result.size} items")
+            result
         } catch (e1: Exception) {
-            android.util.Log.w("DBG_AETHER", "   getMainCategories: cache miss (${e1.message}) → server...")
+            AppLogger.w(TAG, "getMainCategories cache miss → server")
             try {
-                val r = query.get().await()
+                val result = query.get().await()
                     .documents.mapNotNull { it.toObject(Category::class.java)?.copy(id = it.id) }
                     .sortedBy { it.sortOrder }
-                android.util.Log.d("DBG_AETHER", "   getMainCategories: server → ${r.size} item")
-                r
+                AppLogger.d(TAG, "getMainCategories server → ${result.size} items")
+                result
             } catch (e2: Exception) {
-                android.util.Log.e("DBG_AETHER", "   getMainCategories: server FAIL → ${e2.message}")
+                AppLogger.e(TAG, "getMainCategories FAILED", e2)
                 emptyList()
             }
         }

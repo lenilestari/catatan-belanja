@@ -9,7 +9,10 @@ data class Wishlist(
     val targetPrice: Double = 0.0,
     val savedAmount: Double = 0.0,
     val monthlyTarget: Double = 0.0,
-    val createdAt: Timestamp = Timestamp(0, 0)
+    val isCompleted: Boolean = false,
+    val completedAt: Timestamp? = null,
+    val createdAt: Timestamp = Timestamp(0, 0),
+    val updatedAt: Timestamp = Timestamp(0, 0)
 ) : Serializable {
     val remaining: Double get() = (targetPrice - savedAmount).coerceAtLeast(0.0)
     val progressPercent: Int get() = if (targetPrice > 0) ((savedAmount / targetPrice) * 100).toInt().coerceIn(0, 100) else 0
