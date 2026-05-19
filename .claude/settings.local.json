@@ -16,7 +16,9 @@
       "PowerShell(cd \"D:\\\\Aplikasi\\\\aethersea\"; $env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; .\\\\gradlew.bat assembleDebug 2>&1 | Where-Object { $_ -match \"error:|BUILD|Unresolved\" } | Select-Object -Last 15)",
       "PowerShell(cd \"D:\\\\Aplikasi\\\\aethersea\"; $env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; .\\\\gradlew.bat compileDebugKotlin 2>&1 | Where-Object { $_ -match \"error:|Unresolved|Cannot\" })",
       "PowerShell(cd \"D:\\\\Aplikasi\\\\aethersea\"; $env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; .\\\\gradlew.bat compileDebugKotlin 2>&1 | Select-String \"e:\" | Select-Object -Last 20)",
-      "PowerShell(cd \"D:\\\\Aplikasi\\\\aethersea\"; $env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; .\\\\gradlew.bat compileDebugKotlin --stacktrace 2>&1 | Select-String \"HistoryActivity\" | Select-Object -Last 10)"
+      "PowerShell(cd \"D:\\\\Aplikasi\\\\aethersea\"; $env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; .\\\\gradlew.bat compileDebugKotlin --stacktrace 2>&1 | Select-String \"HistoryActivity\" | Select-Object -Last 10)",
+      "Bash(xargs grep *)",
+      "Bash(./gradlew.bat compileDebugKotlin -q)"
     ]
   }
 }

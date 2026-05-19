@@ -16,6 +16,7 @@ import com.lenilestari.aethersea.data.repository.WishlistRepository
 import com.lenilestari.aethersea.databinding.ActivityHistoryBinding
 import com.lenilestari.aethersea.export.ExcelExporter
 import com.lenilestari.aethersea.ui.adapters.SessionAdapter
+import com.lenilestari.aethersea.util.AppLogger
 import com.lenilestari.aethersea.util.Constants
 import com.lenilestari.aethersea.util.CurrencyUtils
 import com.lenilestari.aethersea.util.DateUtils
@@ -29,7 +30,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
 import java.util.Calendar
 
 class HistoryActivity : AppCompatActivity() {
@@ -122,46 +122,42 @@ class HistoryActivity : AppCompatActivity() {
 
     private suspend fun loadData() {
         try {
-            val success = withTimeoutOrNull(10_000L) {
-                coroutineScope {
-                    val sessionsDeferred = async { sessionRepo.getAllSessions() }
-                    val profileDeferred = async { UserRepository(userId).getProfile() }
+            coroutineScope {
+                val sessionsDeferred = async { sessionRepo.getAllSessions() }
+                val profileDeferred = async { UserRepository(userId).getProfile() }
 
-                    val sessions = sessionsDeferred.await()
-                    adapter.submitList(sessions)
-                    binding.tvEmpty.visibility = if (sessions.isEmpty()) View.VISIBLE else View.GONE
+                val sessions = sessionsDeferred.await()
+                adapter.submitList(sessions)
+                binding.tvEmpty.visibility = if (sessions.isEmpty()) View.VISIBLE else View.GONE
 
-                    val monthStart = DateUtils.startOfMonth()
-                    val monthSessions = sessions.filter { it.date >= monthStart }
-                    val monthTotal = monthSessions.sumOf { it.grandTotal }
-                    binding.tvBulanIni.text = CurrencyUtils.format(monthTotal)
+                val monthStart = DateUtils.startOfMonth()
+                val monthSessions = sessions.filter { it.date >= monthStart }
+                val monthTotal = monthSessions.sumOf { it.grandTotal }
+                binding.tvBulanIni.text = CurrencyUtils.format(monthTotal)
 
-                    val dayOfMonth = maxOf(1, Calendar.getInstance().get(Calendar.DAY_OF_MONTH))
-                    val avgPerDay = if (dayOfMonth > 0) monthTotal / dayOfMonth else 0.0
-                    binding.tvRataRata.text = CurrencyUtils.format(avgPerDay)
+                val dayOfMonth = maxOf(1, Calendar.getInstance().get(Calendar.DAY_OF_MONTH))
+                val avgPerDay = if (dayOfMonth > 0) monthTotal / dayOfMonth else 0.0
+                binding.tvRataRata.text = CurrencyUtils.format(avgPerDay)
 
-                    val profile = profileDeferred.await()
-                    val lastReset = profile?.lastResetAt ?: profile?.createdAt
-                    if (lastReset != null) {
-                        val days = DateUtils.daysUntilReset(lastReset, Constants.CLEANUP_INTERVAL_DAYS)
-                        if (days <= 14) {
-                            binding.bannerCleanup.visibility = View.VISIBLE
-                            binding.tvCleanupWarning.text = "⚠️ Reset otomatis dalam $days hari. Excel akan diekspor sebelum data dihapus."
-                        }
+                val profile = profileDeferred.await()
+                val lastReset = profile?.lastResetAt ?: profile?.createdAt
+                if (lastReset != null) {
+                    val days = DateUtils.daysUntilReset(lastReset, Constants.CLEANUP_INTERVAL_DAYS)
+                    if (days <= 14) {
+                        binding.bannerCleanup.visibility = View.VISIBLE
+                        binding.tvCleanupWarning.text = "⚠️ Reset otomatis dalam $days hari. Excel akan diekspor sebelum data dihapus."
                     }
                 }
-                true
             }
-            if (success == null) {
-                showSnackbar(binding.root, "Koneksi lambat, coba refresh", isError = true)
-            } else if (isFirstLoad) {
+            if (isFirstLoad) {
                 val elapsed = System.currentTimeMillis() - shimmerShownAt
                 val remaining = 300L - elapsed
                 if (remaining > 0) delay(remaining)
             }
         } catch (e: Exception) {
             if (e is CancellationException) throw e
-            showSnackbar(binding.root, "Gagal memuat riwayat, coba lagi", isError = true)
+            AppLogger.e("HistoryActivity", "loadData failed", e)
+            showSnackbar(binding.root, "Gagal memuat riwayat: ${e.message ?: "coba lagi"}", isError = true)
         } finally {
             isFirstLoad = false
             hideShimmerList(binding.shimmerContainer, binding.rvSessions)

@@ -74,42 +74,40 @@ class SessionRepository(private val userId: String) {
 
     suspend fun getAllSessions(): List<ShoppingSession> {
         val query = collection.orderBy("date", Query.Direction.DESCENDING)
-        return try {
-            query.get(Source.CACHE).await()
-                .documents.mapNotNull { it.toObject(ShoppingSession::class.java)?.copy(id = it.id) }
-        } catch (_: Exception) {
-            try {
-                query.get().await()
-                    .documents.mapNotNull { it.toObject(ShoppingSession::class.java)?.copy(id = it.id) }
-            } catch (_: Exception) { emptyList() }
-        }
+        return fetchSessions(query, "getAllSessions")
     }
 
     suspend fun getSessionsInRange(start: Timestamp, end: Timestamp): List<ShoppingSession> {
-        val query = collection.whereGreaterThanOrEqualTo("date", start)
+        val query = collection
+            .whereGreaterThanOrEqualTo("date", start)
             .whereLessThanOrEqualTo("date", end)
-        return try {
-            query.get(Source.CACHE).await()
-                .documents.mapNotNull { it.toObject(ShoppingSession::class.java)?.copy(id = it.id) }
-        } catch (_: Exception) {
-            try {
-                query.get().await()
-                    .documents.mapNotNull { it.toObject(ShoppingSession::class.java)?.copy(id = it.id) }
-            } catch (_: Exception) { emptyList() }
-        }
+            .orderBy("date", Query.Direction.DESCENDING)
+        return fetchSessions(query, "getSessionsInRange[${start.seconds}..${end.seconds}]")
     }
 
-    suspend fun getSessionsThisMonth(start: Timestamp): List<ShoppingSession> {
-        val query = collection.whereGreaterThanOrEqualTo("date", start)
-            .orderBy("date", Query.Direction.DESCENDING)
+    suspend fun getSessionsThisMonth(start: Timestamp, end: Timestamp): List<ShoppingSession> =
+        getSessionsInRange(start, end)
+
+    // Server-first to guarantee fresh data; CACHE only as offline fallback.
+    // Source.CACHE-first was masking server data when the cache held a stale
+    // empty snapshot for the same query shape.
+    private suspend fun fetchSessions(query: Query, ctx: String): List<ShoppingSession> {
         return try {
-            query.get(Source.CACHE).await()
-                .documents.mapNotNull { it.toObject(ShoppingSession::class.java)?.copy(id = it.id) }
-        } catch (_: Exception) {
+            val snap = query.get(Source.SERVER).await()
+            AppLogger.d(TAG, "$ctx SERVER ok size=${snap.size()}")
+            snap.documents.mapNotNull { it.toObject(ShoppingSession::class.java)?.copy(id = it.id) }
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (eServer: Exception) {
+            AppLogger.w(TAG, "$ctx SERVER failed (${eServer.message}); falling back to CACHE")
             try {
-                query.get().await()
-                    .documents.mapNotNull { it.toObject(ShoppingSession::class.java)?.copy(id = it.id) }
-            } catch (_: Exception) { emptyList() }
+                val snap = query.get(Source.CACHE).await()
+                AppLogger.d(TAG, "$ctx CACHE ok size=${snap.size()}")
+                snap.documents.mapNotNull { it.toObject(ShoppingSession::class.java)?.copy(id = it.id) }
+            } catch (eCache: Exception) {
+                AppLogger.e(TAG, "$ctx CACHE also failed", eCache)
+                emptyList()
+            }
         }
     }
 }
