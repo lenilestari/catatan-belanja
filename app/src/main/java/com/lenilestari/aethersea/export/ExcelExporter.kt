@@ -43,7 +43,7 @@ object ExcelExporter {
             val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, cv) ?: return@withContext false
 
             resolver.openOutputStream(uri)?.buffered()?.use { stream ->
-                val wb = Workbook(stream, "Catatan Belanja", "1.0")
+                val wb = Workbook(stream, "Aethersea", "1.0")
                 writeRingkasan(wb, sessions, monthlyBudgets)
                 writeDetailBelanja(wb, sessions)
                 writeSumberBudget(wb, budgetSources)
@@ -59,7 +59,7 @@ object ExcelExporter {
 
     private fun writeRingkasan(wb: Workbook, sessions: List<ShoppingSession>, monthlyBudgets: List<MonthlyBudget>) {
         val ws = wb.newWorksheet("Ringkasan")
-        ws.value(0, 0, "Catatan Belanja")
+        ws.value(0, 0, "Aethersea")
         ws.style(0, 0).bold().set()
         ws.value(1, 0, "Diekspor: ${dateFmt.format(Date())}")
         ws.value(3, 0, "Ringkasan Budget Per Bulan")

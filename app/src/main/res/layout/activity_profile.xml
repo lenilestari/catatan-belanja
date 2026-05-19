@@ -398,7 +398,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:text="Catatan Belanja v1.0.0"
+                android:text="Aethersea v1.0.0"
                 android:textSize="12sp"
                 android:textColor="@color/text_caption"
                 android:gravity="center"/>
