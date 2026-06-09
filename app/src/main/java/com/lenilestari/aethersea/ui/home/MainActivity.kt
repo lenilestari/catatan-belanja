@@ -360,8 +360,7 @@ class MainActivity : AppCompatActivity() {
                     val leftColor = if (summary.leftAmount >= 0) R.color.success_text else R.color.danger_text
                     binding.tvLeft.setTextColor(ContextCompat.getColor(this@MainActivity, leftColor))
 
-                    val (start, _) = budgetCalculator.getMonthBoundaries(budgetCalculator.getCurrentPeriod())
-                    val sessions = sessionRepo.getSessionsThisMonth(start)
+                    val sessions = sessionRepo.getSessionsByPeriod(budgetCalculator.getCurrentPeriod())
                     binding.tvTotalBulan.text = CurrencyUtils.format(sessions.sumOf { it.grandTotal })
                     binding.tvSessionCount.text = "📈 ${sessions.size} sesi"
 

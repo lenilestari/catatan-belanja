@@ -13,6 +13,9 @@ import com.lenilestari.aethersea.data.model.User
 import com.lenilestari.aethersea.data.repository.UserRepository
 import com.lenilestari.aethersea.databinding.ActivityLoginBinding
 import com.lenilestari.aethersea.ui.home.MainActivity
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -51,22 +54,31 @@ class LoginActivity : AppCompatActivity() {
         val password = binding.etPassword.text.toString()
 
         if (email.isEmpty()) { binding.etEmail.error = "Email wajib diisi"; return }
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            binding.etEmail.error = "Format email tidak valid"; return
+        }
         if (password.isEmpty()) { binding.etPassword.error = "Kata sandi wajib diisi"; return }
+        if (password.length < 6) { binding.etPassword.error = "Kata sandi minimal 6 karakter"; return }
 
         setLoading(true)
         lifecycleScope.launch {
+            var didNavigate = false
             try {
                 auth.signInWithEmailAndPassword(email, password).await()
+                didNavigate = true
                 goToMain()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: FirebaseAuthInvalidUserException) {
+                Toast.makeText(this@LoginActivity, "Email tidak terdaftar", Toast.LENGTH_SHORT).show()
+            } catch (e: FirebaseAuthInvalidCredentialsException) {
+                Toast.makeText(this@LoginActivity, "Kata sandi salah", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
-                setLoading(false)
-                val msg = when {
-                    e.message?.contains("no user record") == true -> "Email tidak terdaftar"
-                    e.message?.contains("password is invalid") == true -> "Kata sandi salah"
-                    e.message?.contains("badly formatted") == true -> "Format email tidak valid"
-                    else -> "Login gagal. Periksa email dan kata sandi."
-                }
+                val msg = if (e.message?.contains("network", ignoreCase = true) == true)
+                    "Tidak ada koneksi internet" else "Login gagal. Coba lagi."
                 Toast.makeText(this@LoginActivity, msg, Toast.LENGTH_SHORT).show()
+            } finally {
+                if (!didNavigate) setLoading(false)
             }
         }
     }

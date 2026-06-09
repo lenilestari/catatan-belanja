@@ -1,12 +1,12 @@
 package com.lenilestari.aethersea.processor
 
 import android.content.Context
-import android.util.Log
 import com.lenilestari.aethersea.data.model.KamusItem
 import com.lenilestari.aethersea.data.model.ShoppingItem
 import com.lenilestari.aethersea.data.repository.KamusRepository
 import com.lenilestari.aethersea.data.repository.LearningRepository
 import com.lenilestari.aethersea.remote.GeminiClient
+import com.lenilestari.aethersea.util.AppLogger
 
 private const val TAG = "KamusLearn"
 
@@ -16,69 +16,69 @@ object KamusLearningManager {
     private const val ALIAS_SIMILARITY_THRESHOLD = 0.80
 
     suspend fun analyze(context: Context, parsedItems: List<ShoppingItem>) {
-        Log.d(TAG, "════ analyze() START ════")
-        Log.d(TAG, "  parsedItems (${parsedItems.size}): ${parsedItems.map { it.item }}")
+        AppLogger.d(TAG, "════ analyze() START ════")
+        AppLogger.d(TAG, "  parsedItems (${parsedItems.size}): ${parsedItems.map { it.item }}")
         try {
             val kamusItems = KamusRepository().getAllCached()
-            Log.d(TAG, "  kamus size: ${kamusItems.size}")
+            AppLogger.d(TAG, "  kamus size: ${kamusItems.size}")
 
             // 1. Filter item yang sudah dikenal
             val allNames = parsedItems.map { it.item.lowercase().trim() }
                 .filter { it.isNotBlank() && it.length > 1 && it != "item" }
-            Log.d(TAG, "  [1] kandidat nama    : $allNames")
+            AppLogger.d(TAG, "  [1] kandidat nama    : $allNames")
 
             val unknownNames = allNames.filter { name -> !isKnown(name, kamusItems) }.distinct()
             val knownNames   = allNames.filter { name ->  isKnown(name, kamusItems) }.distinct()
-            Log.d(TAG, "  [1] sudah dikenal    : $knownNames")
-            Log.d(TAG, "  [1] BELUM dikenal    : $unknownNames")
+            AppLogger.d(TAG, "  [1] sudah dikenal    : $knownNames")
+            AppLogger.d(TAG, "  [1] BELUM dikenal    : $unknownNames")
 
             if (unknownNames.isEmpty()) {
-                Log.d(TAG, "  Semua item sudah dikenal → skip AI learning")
-                Log.d(TAG, "════ analyze() END ════")
+                AppLogger.d(TAG, "  Semua item sudah dikenal → skip AI learning")
+                AppLogger.d(TAG, "════ analyze() END ════")
                 return
             }
 
             // 2. Levenshtein alias hints
             val aliasHints = findAliasHints(unknownNames, kamusItems)
             if (aliasHints.isNotEmpty()) {
-                Log.d(TAG, "  [2] alias hints (≥80%): ${aliasHints.map { (a, t) -> "'$a'→'$t'" }}")
+                AppLogger.d(TAG, "  [2] alias hints (≥80%): ${aliasHints.map { (a, t) -> "'$a'→'$t'" }}")
             } else {
-                Log.d(TAG, "  [2] alias hints: tidak ada yang mirip (semua < 80%)")
+                AppLogger.d(TAG, "  [2] alias hints: tidak ada yang mirip (semua < 80%)")
             }
 
             // 3. AI analisis
-            Log.d(TAG, "  [3] kirim ke Gemini: $unknownNames")
+            AppLogger.d(TAG, "  [3] kirim ke Gemini: $unknownNames")
             val analysisResult = GeminiClient.analyzeLearning(
                 unknownNames = unknownNames,
                 kamusItems   = kamusItems,
                 aliasHints   = aliasHints
             )
             if (analysisResult.isFailure) {
-                Log.e(TAG, "  [3] Gemini GAGAL: ${analysisResult.exceptionOrNull()?.message}")
-                Log.d(TAG, "════ analyze() END ════")
+                AppLogger.e(TAG, "  [3] Gemini GAGAL: ${analysisResult.exceptionOrNull()?.message}")
+                AppLogger.d(TAG, "════ analyze() END ════")
                 return
             }
             val analysis = analysisResult.getOrNull()!!
-            Log.d(TAG, "  [3] Gemini response:")
-            Log.d(TAG, "       new_items   (${analysis.newItems.size}): ${analysis.newItems.map { "${it.name}[${it.category}]" }}")
-            Log.d(TAG, "       new_aliases (${analysis.newAliases.size}): ${analysis.newAliases.map { "${it.alias}→${it.itemName}" }}")
-            Log.d(TAG, "       new_units   (${analysis.newUnits.size}): ${analysis.newUnits.map { "${it.original}→${it.normalized}" }}")
+            AppLogger.d(TAG, "  [3] Gemini response:")
+            AppLogger.d(TAG, "       new_items   (${analysis.newItems.size}): ${analysis.newItems.map { "${it.name}[${it.category}]" }}")
+            AppLogger.d(TAG, "       new_aliases (${analysis.newAliases.size}): ${analysis.newAliases.map { "${it.alias}→${it.itemName}" }}")
+            AppLogger.d(TAG, "       new_units   (${analysis.newUnits.size}): ${analysis.newUnits.map { "${it.original}→${it.normalized}" }}")
 
             // 4. Simpan ke Firestore
             val repo = LearningRepository()
             analysis.newItems.forEach   { repo.upsertNewItem(it) }
             analysis.newAliases.forEach { repo.upsertNewAlias(it) }
             analysis.newUnits.forEach   { repo.upsertNewUnit(it) }
-            Log.d(TAG, "  [4] upsert selesai")
+            AppLogger.d(TAG, "  [4] upsert selesai")
 
             // 5. Promosikan ke kamus
             repo.promoteAboveThreshold(PROMOTE_THRESHOLD)
-            Log.d(TAG, "  [5] promote (threshold=$PROMOTE_THRESHOLD) selesai")
+            AppLogger.d(TAG, "  [5] promote (threshold=$PROMOTE_THRESHOLD) selesai")
 
         } catch (e: Exception) {
-            Log.e(TAG, "  EXCEPTION: ${e.message}", e)
+            AppLogger.e(TAG, "  EXCEPTION: ${e.message}", e)
         }
-        Log.d(TAG, "════ analyze() END ════")
+        AppLogger.d(TAG, "════ analyze() END ════")
     }
 
     // --- Kotlin pre-classification helpers ---
@@ -94,10 +94,10 @@ object KamusLearningManager {
             val (best, sim) = bestMatch(name, kamusItems)
             val simPct = "%.0f%%".format(sim * 100)
             if (sim >= ALIAS_SIMILARITY_THRESHOLD && best != null) {
-                Log.d(TAG, "    levenshtein '$name' ↔ '$best' = $simPct ✓ alias")
+                AppLogger.d(TAG, "    levenshtein '$name' ↔ '$best' = $simPct ✓ alias")
                 name to best
             } else {
-                Log.d(TAG, "    levenshtein '$name' ↔ '${best ?: "-"}' = $simPct ✗ bukan alias")
+                AppLogger.d(TAG, "    levenshtein '$name' ↔ '${best ?: "-"}' = $simPct ✗ bukan alias")
                 null
             }
         }

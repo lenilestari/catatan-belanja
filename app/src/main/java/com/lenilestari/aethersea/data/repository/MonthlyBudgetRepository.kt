@@ -1,16 +1,16 @@
 package com.lenilestari.aethersea.data.repository
 
 import com.google.firebase.Timestamp
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.Source
 import com.lenilestari.aethersea.data.model.MonthlyBudget
 import com.lenilestari.aethersea.util.AppLogger
+import com.lenilestari.aethersea.util.FirestoreInstance
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withTimeoutOrNull
 
 class MonthlyBudgetRepository(private val userId: String) {
-    private val db = FirebaseFirestore.getInstance()
+    private val db = FirestoreInstance.db
     private val collection = db.collection("users").document(userId).collection("monthlyBudgets")
     private companion object { const val TAG = "MonthlyBudgetRepo" }
 

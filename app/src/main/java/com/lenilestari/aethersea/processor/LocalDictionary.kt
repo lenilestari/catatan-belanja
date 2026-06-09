@@ -1,75 +1,64 @@
 package com.lenilestari.aethersea.processor
 
-import android.content.Context
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.lenilestari.aethersea.data.model.KamusItem
 import com.lenilestari.aethersea.data.repository.KamusRepository
+import com.lenilestari.aethersea.util.KnowledgeCache
 
-class LocalDictionary(context: Context) {
-    // Local fallback (from assets) — used when Firestore cache not yet populated
-    private data class DictItem(val name: String, val aliases: List<String>, val common_units: List<String>)
-    private data class DictCategory(val items: List<DictItem>)
-    private data class DictRoot(val categories: Map<String, DictCategory>)
-
-    private val localItems: List<DictItem>
+/**
+ * Dictionary lookup untuk voice input parsing.
+ *
+ * Sumber data (priority order):
+ *   1. Firestore local cache via KamusRepository (akurat, sync otomatis dari server)
+ *   2. KnowledgeCache.kamusItems (in-memory, diisi KnowledgeLoader dari Firestore/JSON)
+ *
+ * Tidak ada lagi init{} yang membaca assets JSON secara langsung.
+ * JSON hanya dibaca oleh KnowledgeLoader sebagai offline fallback, bukan runtime dependency.
+ */
+class LocalDictionary {
     private val repo = KamusRepository()
 
-    init {
-        localItems = try {
-            val json = context.assets.open("kamus_items.json").bufferedReader().readText()
-            val root = Gson().fromJson<DictRoot>(json, object : TypeToken<DictRoot>() {}.type)
-            root.categories.values.flatMap { it.items }
-        } catch (_: Exception) { emptyList() }
-    }
-
-    // Fast path: exact match from Firestore (hits local cache after migration)
+    /** Exact match — coba Firestore cache via repo, lalu in-memory cache */
     suspend fun findExact(query: String): String? {
         val result = repo.findExact(query)
         if (result != null) return result.name
-        return findLocalExact(query)
+
+        val q = query.trim().lowercase()
+        return KnowledgeCache.kamusItems
+            .firstOrNull { it.name == q || it.aliases.contains(q) }
+            ?.name
     }
 
-    // Fuzzy match: load all from Firestore cache, run Levenshtein locally
+    /**
+     * Fuzzy match Levenshtein distance.
+     * Prioritas: Firestore cache → KnowledgeCache (in-memory fallback).
+     */
     suspend fun findClosest(query: String, maxDistance: Int = 2): String? {
-        val q = query.trim().lowercase()
+        val q             = query.trim().lowercase()
         val firestoreItems = repo.getAllCached()
+        val items          = firestoreItems.ifEmpty { KnowledgeCache.kamusItems }
 
-        if (firestoreItems.isNotEmpty()) {
-            // Exact match first
-            firestoreItems.firstOrNull { it.name == q || it.aliases.contains(q) }
-                ?.let { return it.name }
-            // Fuzzy
-            var best: String? = null
-            var bestDist = maxDistance + 1
-            firestoreItems.forEach { item ->
-                (listOf(item.name) + item.aliases).forEach { candidate ->
-                    val d = levenshtein(q, candidate)
-                    if (d < bestDist) { bestDist = d; best = item.name }
-                }
-            }
-            if (bestDist <= maxDistance) return best
-        }
+        if (items.isEmpty()) return null
 
-        // Fallback to local assets
-        return findLocalFuzzy(q, maxDistance)
-    }
+        // Exact/alias match dulu (O(n) lebih cepat dari Levenshtein loop full)
+        items.firstOrNull { it.name == q || it.aliases.contains(q) }
+            ?.let { return it.name }
 
-    private fun findLocalExact(query: String): String? {
-        val q = query.trim().lowercase()
-        return localItems.firstOrNull { it.name == q || it.aliases.contains(q) }?.name
-    }
-
-    private fun findLocalFuzzy(q: String, maxDistance: Int): String? {
+        // Fuzzy Levenshtein
         var best: String? = null
-        var bestDist = maxDistance + 1
-        localItems.forEach { item ->
-            (listOf(item.name) + item.aliases).forEach { c ->
-                val d = levenshtein(q, c)
+        var bestDist      = maxDistance + 1
+        items.forEach { item ->
+            (listOf(item.name) + item.aliases).forEach { candidate ->
+                val d = levenshtein(q, candidate)
                 if (d < bestDist) { bestDist = d; best = item.name }
             }
         }
         return if (bestDist <= maxDistance) best else null
+    }
+
+    /** Semua item dari cache — dipakai KamusLearningManager untuk Levenshtein bulk */
+    suspend fun getAllItems(): List<KamusItem> {
+        val fromFirestore = repo.getAllCached()
+        return fromFirestore.ifEmpty { KnowledgeCache.kamusItems }
     }
 
     private fun levenshtein(a: String, b: String): Int {
@@ -78,11 +67,10 @@ class LocalDictionary(context: Context) {
         for (j in 0..b.length) dp[0][j] = j
         for (i in 1..a.length) for (j in 1..b.length) {
             dp[i][j] = if (a[i - 1] == b[j - 1]) dp[i - 1][j - 1]
-            else 1 + minOf(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1])
+                       else 1 + minOf(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1])
         }
         return dp[a.length][b.length]
     }
 }
 
-// Extension to convert Firestore KamusItem → can be used by adapters/autocomplete
 fun KamusItem.toDisplayName(): String = name

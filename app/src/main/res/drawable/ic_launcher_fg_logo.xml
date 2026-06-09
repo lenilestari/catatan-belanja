@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Foreground layer untuk adaptive icon.
+    Canvas adaptive = 108dp. Safe zone = 72dp (18dp dari tepi).
+    Padding 29dp tiap sisi → logo = 50dp = 69% dari safe zone.
+    Tidak akan terpotong oleh masking launcher manapun.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:drawable="@drawable/logo2"
+        android:left="29dp"
+        android:top="29dp"
+        android:right="29dp"
+        android:bottom="29dp"/>
+</layer-list>

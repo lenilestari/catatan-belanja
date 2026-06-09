@@ -15,7 +15,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import androidx.lifecycle.lifecycleScope
-import com.google.firebase.Timestamp
 import com.google.firebase.storage.FirebaseStorage
 import com.lenilestari.aethersea.R
 import com.lenilestari.aethersea.auth.AuthManager
@@ -28,7 +27,6 @@ import com.lenilestari.aethersea.ui.budget.BudgetSourcesActivity
 import com.lenilestari.aethersea.ui.home.MainActivity
 import com.lenilestari.aethersea.ui.wishlist.WishlistActivity
 import com.lenilestari.aethersea.util.CurrencyUtils
-import com.lenilestari.aethersea.util.DateUtils
 import com.lenilestari.aethersea.util.disableActiveIndicator
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -162,8 +160,9 @@ class ProfileActivity : AppCompatActivity() {
                 ?: fbUser?.photoUrl?.toString()
             showAvatar(photoUrl)
 
-            val monthStart = DateUtils.startOfMonth()
-            val sessions = SessionRepository(userId).getSessionsInRange(monthStart, Timestamp.now())
+            val cal = java.util.Calendar.getInstance()
+            val period = String.format("%04d-%02d", cal.get(java.util.Calendar.YEAR), cal.get(java.util.Calendar.MONTH) + 1)
+            val sessions = SessionRepository(userId).getSessionsByPeriod(period)
             binding.tvStatSesi.text = sessions.size.toString()
             binding.tvStatSpending.text = CurrencyUtils.format(sessions.sumOf { it.grandTotal })
 

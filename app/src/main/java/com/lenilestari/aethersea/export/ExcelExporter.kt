@@ -44,8 +44,9 @@ object ExcelExporter {
 
             resolver.openOutputStream(uri)?.buffered()?.use { stream ->
                 val wb = Workbook(stream, "Catatan Belanja", "1.0")
-                writeRingkasan(wb, sessions, monthlyBudgets)
+                // Detail Belanja dibuat pertama agar menjadi sheet default saat Excel dibuka
                 writeDetailBelanja(wb, sessions)
+                writeRingkasan(wb, sessions, monthlyBudgets)
                 writeSumberBudget(wb, budgetSources)
                 writeWishlist(wb, wishlists)
                 wb.finish()
@@ -95,24 +96,51 @@ object ExcelExporter {
 
     private fun writeDetailBelanja(wb: Workbook, sessions: List<ShoppingSession>) {
         val ws = wb.newWorksheet("Detail Belanja")
-        val headers = arrayOf("Tanggal", "Kategori Utama", "Sub Kategori", "Item", "Qty", "Unit", "Harga Satuan", "Total", "Source")
-        headers.forEachIndexed { i, h -> ws.value(0, i, h); ws.style(0, i).bold().set() }
+        ws.value(0, 0, "Diekspor: ${dateFmt.format(Date())}")
+        val headers = arrayOf("Tanggal", "Kategori Utama", "Sub Kategori", "Nama Barang", "Qty", "Satuan", "Harga Satuan", "Total Item", "Total Sesi", "Source")
+        headers.forEachIndexed { i, h -> ws.value(1, i, h); ws.style(1, i).bold().set() }
 
-        var row = 1
-        for (s in sessions.sortedByDescending { it.date.seconds }) {
+        var row = 2
+        val sorted = sessions.sortedByDescending { it.date.seconds }
+        for (s in sorted) {
             val tanggal = dateFmt.format(s.date.toDate())
-            for (item in s.items) {
+            if (s.items.isEmpty()) {
+                // Sesi tanpa item detail — tetap tampilkan baris ringkasan
                 ws.value(row, 0, tanggal)
                 ws.value(row, 1, s.mainCategoryName)
                 ws.value(row, 2, s.subCategoryName)
-                ws.value(row, 3, item.item)
-                ws.value(row, 4, item.qty)
-                ws.value(row, 5, item.unit)
-                ws.value(row, 6, item.price)
-                ws.value(row, 7, item.total)
-                ws.value(row, 8, item.source)
+                ws.value(row, 3, "(tidak ada detail item)")
+                ws.value(row, 8, s.grandTotal)
+                ws.style(row, 8).bold().set()
                 row++
+            } else {
+                for ((idx, item) in s.items.withIndex()) {
+                    ws.value(row, 0, tanggal)
+                    ws.value(row, 1, s.mainCategoryName)
+                    ws.value(row, 2, s.subCategoryName)
+                    ws.value(row, 3, item.item)
+                    ws.value(row, 4, item.qty)
+                    ws.value(row, 5, item.unit)
+                    ws.value(row, 6, item.price)
+                    ws.value(row, 7, item.total)
+                    // Total sesi hanya ditulis di baris pertama sesi itu
+                    if (idx == 0) {
+                        ws.value(row, 8, s.grandTotal)
+                        ws.style(row, 8).bold().set()
+                    }
+                    ws.value(row, 9, item.source)
+                    row++
+                }
             }
+        }
+
+        // Baris grand total di bawah
+        if (sorted.isNotEmpty()) {
+            row++
+            ws.value(row, 7, "TOTAL KESELURUHAN")
+            ws.value(row, 8, sorted.sumOf { it.grandTotal })
+            ws.style(row, 7).bold().set()
+            ws.style(row, 8).bold().set()
         }
     }
 

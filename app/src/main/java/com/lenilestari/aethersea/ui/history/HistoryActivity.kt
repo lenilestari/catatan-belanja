@@ -8,17 +8,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
-import com.lenilestari.aethersea.data.repository.BudgetSourceRepository
 import com.lenilestari.aethersea.data.repository.MonthlyBudgetRepository
 import com.lenilestari.aethersea.data.repository.SessionRepository
 import com.lenilestari.aethersea.data.repository.UserRepository
-import com.lenilestari.aethersea.data.repository.WishlistRepository
 import com.lenilestari.aethersea.databinding.ActivityHistoryBinding
-import com.lenilestari.aethersea.export.ExcelExporter
+import com.lenilestari.aethersea.export.ReportAggregator
+import com.lenilestari.aethersea.export.SummaryReportExporter
 import com.lenilestari.aethersea.ui.adapters.SessionAdapter
 import com.lenilestari.aethersea.util.Constants
 import com.lenilestari.aethersea.util.CurrencyUtils
-import com.lenilestari.aethersea.util.DateUtils
 import com.lenilestari.aethersea.util.hideShimmerList
 import com.lenilestari.aethersea.util.setBtnLoading
 import com.lenilestari.aethersea.util.showShimmerList
@@ -72,12 +70,15 @@ class HistoryActivity : AppCompatActivity() {
                 setBtnLoading(binding.btnExport, binding.tvBtnExport, binding.pbBtnExport, true)
                 try {
                     val sessions = sessionRepo.getAllSessions()
-                    val wishlists = WishlistRepository(userId).getAll()
-                    val sources = BudgetSourceRepository(userId).getAll()
-                    val monthly = MonthlyBudgetRepository(userId).getAll()
-                    val success = ExcelExporter.export(this@HistoryActivity, sessions, wishlists, sources, monthly)
+                    val monthly  = MonthlyBudgetRepository(userId).getAll()
+                    val profile  = UserRepository(userId).getProfile()
+                    val userName = profile?.displayName ?: ""
+
+                    val report  = ReportAggregator.aggregate(sessions, monthly, userName)
+                    val success = SummaryReportExporter.export(this@HistoryActivity, report)
+
                     if (success) {
-                        showSnackbar(binding.root, "Excel berhasil disimpan ke Downloads/CatatanBelanja/")
+                        showSnackbar(binding.root, "✓ Financial Report tersimpan di Downloads/CatatanBelanja/")
                     } else {
                         showSnackbar(binding.root, "Export gagal, coba lagi", isError = true)
                     }
@@ -120,19 +121,26 @@ class HistoryActivity : AppCompatActivity() {
         loadJob = lifecycleScope.launch { loadData() }
     }
 
+    private fun currentPeriod(): String {
+        val cal = Calendar.getInstance()
+        return String.format("%04d-%02d", cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1)
+    }
+
     private suspend fun loadData() {
         try {
             val success = withTimeoutOrNull(10_000L) {
                 coroutineScope {
-                    val sessionsDeferred = async { sessionRepo.getAllSessions() }
+                    // Display list: limit 200 agar tidak load ribuan dokumen sekaligus
+                    val sessionsDeferred = async { sessionRepo.getAllSessions(limit = 200) }
+                    // Month stats: pakai period query — akurat dan pakai composite index
+                    val monthSessionsDeferred = async { sessionRepo.getSessionsByPeriod(currentPeriod()) }
                     val profileDeferred = async { UserRepository(userId).getProfile() }
 
                     val sessions = sessionsDeferred.await()
                     adapter.submitList(sessions)
                     binding.tvEmpty.visibility = if (sessions.isEmpty()) View.VISIBLE else View.GONE
 
-                    val monthStart = DateUtils.startOfMonth()
-                    val monthSessions = sessions.filter { it.date >= monthStart }
+                    val monthSessions = monthSessionsDeferred.await()
                     val monthTotal = monthSessions.sumOf { it.grandTotal }
                     binding.tvBulanIni.text = CurrencyUtils.format(monthTotal)
 
@@ -143,7 +151,7 @@ class HistoryActivity : AppCompatActivity() {
                     val profile = profileDeferred.await()
                     val lastReset = profile?.lastResetAt ?: profile?.createdAt
                     if (lastReset != null) {
-                        val days = DateUtils.daysUntilReset(lastReset, Constants.CLEANUP_INTERVAL_DAYS)
+                        val days = com.lenilestari.aethersea.util.DateUtils.daysUntilReset(lastReset, Constants.CLEANUP_INTERVAL_DAYS)
                         if (days <= 14) {
                             binding.bannerCleanup.visibility = View.VISIBLE
                             binding.tvCleanupWarning.text = "⚠️ Reset otomatis dalam $days hari. Excel akan diekspor sebelum data dihapus."

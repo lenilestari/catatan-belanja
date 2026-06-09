@@ -1,12 +1,16 @@
 package com.lenilestari.aethersea.data.repository
 
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.Source
 import com.lenilestari.aethersea.data.model.KamusItem
+import com.lenilestari.aethersea.util.AppLogger
+import com.lenilestari.aethersea.util.FirestoreInstance
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withTimeoutOrNull
 
 class KamusRepository {
-    private val collection = FirebaseFirestore.getInstance().collection("kamus")
+    private val collection = FirestoreInstance.db.collection("kamus")
 
     // Exact match by name or alias — used after voice recognition
     suspend fun findExact(query: String): KamusItem? {
@@ -45,17 +49,21 @@ class KamusRepository {
         snap.documents.mapNotNull { it.toObject(KamusItem::class.java)?.copy(id = it.id) }
     } catch (_: Exception) { emptyList() }
 
-    // Upload a batch of items (used by migration only)
+    // Upload a batch of items — upsert safe, timeout per chunk
     suspend fun uploadBatch(items: List<KamusItem>): Result<Unit> = try {
-        val db = FirebaseFirestore.getInstance()
+        val db = FirestoreInstance.db
         items.chunked(400).forEach { chunk ->
             val batch = db.batch()
             chunk.forEach { item ->
-                val docId = item.name.replace(" ", "_").replace("/", "_")
-                batch.set(collection.document(docId), item.copy(id = docId))
+                val docId = item.name.trim().lowercase()
+                    .replace(" ", "_").replace("/", "_")
+                // SetOptions.merge() = upsert: tidak hapus field yang sudah ada di Firestore
+                batch.set(collection.document(docId), item.copy(id = docId), SetOptions.merge())
             }
-            batch.commit().await() // await for migration (one-time, ok to be slow)
+            withTimeoutOrNull(15_000L) { batch.commit().await() }
+                ?: AppLogger.w("KamusRepo", "uploadBatch chunk timeout (offline, cached locally)")
         }
         Result.success(Unit)
-    } catch (e: Exception) { Result.failure(e) }
+    } catch (e: CancellationException) { throw e }
+    catch (e: Exception) { AppLogger.e("KamusRepo", "uploadBatch FAILED", e); Result.failure(e) }
 }

@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">Catatan Belanja</string>
-    <string name="login_title">Catatan Belanja</string>
+    <string name="app_name">Aethersea</string>
+    <string name="login_title">Aethersea</string>
     <string name="login_subtitle">Catat belanja, ngomong aja.</string>
     <string name="btn_login_google">Masuk dengan Google</string>
     <string name="login_footer">Dengan masuk, kamu setuju dengan Kebijakan Privasi dan Syarat Penggunaan.</string>

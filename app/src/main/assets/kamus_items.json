@@ -103,7 +103,7 @@
         { "name": "body wash", "aliases": ["sabun cair", "biore"], "common_units": ["botol"] },
         { "name": "deodoran", "aliases": ["deodorant", "rexona"], "common_units": ["botol"] },
         { "name": "tisu toilet", "aliases": ["tisu wc", "toilet paper"], "common_units": ["roll", "pak"] },
-        { "name": "pembalut", "aliases": ["softex", "laurier", "charm"], "common_units": ["pak"] },
+        { "name": "pembalut", "aliases": ["softex", " laurier", "charm"], "common_units": ["pak"] },
         { "name": "popok", "aliases": ["pampers", "merries", "sweety", "diaper"], "common_units": ["pak"] },
         { "name": "kapas", "aliases": [], "common_units": ["pak"] },
         { "name": "obat nyamuk", "aliases": ["baygon", "vape", "hit"], "common_units": ["botol", "kaleng"] },

@@ -1,8 +1,10 @@
 package com.lenilestari.aethersea.data.model
 
+import com.google.firebase.Timestamp
+
 data class LearningCandidate(
     val id: String = "",
-    val type: String = "",            // "new_item" | "new_alias" | "new_unit"
+    val type: String = "",             // "new_item" | "new_alias" | "new_unit"
     val itemName: String = "",
     val alias: String = "",
     val category: String = "",
@@ -10,7 +12,10 @@ data class LearningCandidate(
     val originalUnit: String = "",
     val normalizedUnit: String = "",
     val count: Int = 1,
-    val lastSeenMs: Long = 0L
+    val confidence: Double = 0.0,
+    val lastSeenMs: Long = 0L,
+    val createdAt: Timestamp = Timestamp(0, 0),
+    val updatedAt: Timestamp = Timestamp(0, 0)
 )
 
 // Gemini learning response

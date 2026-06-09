@@ -1,14 +1,14 @@
 package com.lenilestari.aethersea.data.repository
 
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Source
 import com.lenilestari.aethersea.data.model.Category
 import com.lenilestari.aethersea.util.AppLogger
 import com.lenilestari.aethersea.util.Constants
+import com.lenilestari.aethersea.util.FirestoreInstance
 import kotlinx.coroutines.tasks.await
 
 class CategoryRepository(private val userId: String) {
-    private val db = FirebaseFirestore.getInstance()
+    private val db = FirestoreInstance.db
     private val collection = db.collection("users").document(userId).collection("categories")
     private companion object { const val TAG = "CategoryRepo" }
 

@@ -34,4 +34,7 @@
     <color name="text_on_dark">#FFFFFF</color>
     <color name="danger_bg">#FEE2E2</color>
     <color name="danger_text">#B91C1C</color>
+
+    <!-- Launcher icon background — dark navy sesuai brand Aethersea -->
+    <color name="ic_launcher_background">#1A1A2E</color>
 </resources>

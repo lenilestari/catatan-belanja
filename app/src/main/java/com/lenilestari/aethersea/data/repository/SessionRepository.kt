@@ -1,16 +1,16 @@
 package com.lenilestari.aethersea.data.repository
 
 import com.google.firebase.Timestamp
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.Source
 import com.lenilestari.aethersea.data.model.ShoppingSession
 import com.lenilestari.aethersea.util.AppLogger
+import com.lenilestari.aethersea.util.FirestoreInstance
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withTimeoutOrNull
 
 class SessionRepository(private val userId: String) {
-    private val db = FirebaseFirestore.getInstance()
+    private val db = FirestoreInstance.db
     private val collection = db.collection("users").document(userId).collection("sessions")
     private companion object { const val TAG = "SessionRepo" }
 
@@ -72,16 +72,24 @@ class SessionRepository(private val userId: String) {
         snap.toObject(ShoppingSession::class.java)?.copy(id = snap.id)
     } catch (_: Exception) { null }
 
-    suspend fun getAllSessions(): List<ShoppingSession> {
-        val query = collection.orderBy("date", Query.Direction.DESCENDING)
+    // limit = null → unlimited (untuk export). limit = angka → untuk UI display.
+    suspend fun getAllSessions(limit: Long? = null): List<ShoppingSession> {
+        AppLogger.d(TAG, "getAllSessions limit=$limit")
+        var query = collection.orderBy("date", Query.Direction.DESCENDING)
+        if (limit != null) query = query.limit(limit)
         return try {
-            query.get(Source.CACHE).await()
+            val result = query.get(Source.CACHE).await()
                 .documents.mapNotNull { it.toObject(ShoppingSession::class.java)?.copy(id = it.id) }
+            AppLogger.d(TAG, "getAllSessions cache → ${result.size} items")
+            result
         } catch (_: Exception) {
+            AppLogger.w(TAG, "getAllSessions cache miss → server")
             try {
-                query.get().await()
+                val result = query.get().await()
                     .documents.mapNotNull { it.toObject(ShoppingSession::class.java)?.copy(id = it.id) }
-            } catch (_: Exception) { emptyList() }
+                AppLogger.d(TAG, "getAllSessions server → ${result.size} items")
+                result
+            } catch (e: Exception) { AppLogger.e(TAG, "getAllSessions FAILED", e); emptyList() }
         }
     }
 
@@ -99,17 +107,25 @@ class SessionRepository(private val userId: String) {
         }
     }
 
-    suspend fun getSessionsThisMonth(start: Timestamp): List<ShoppingSession> {
-        val query = collection.whereGreaterThanOrEqualTo("date", start)
+    // Pakai composite index: period ASC + date DESC — lebih efisien dari range timestamp
+    suspend fun getSessionsByPeriod(period: String): List<ShoppingSession> {
+        AppLogger.d(TAG, "getSessionsByPeriod period=$period")
+        val query = collection
+            .whereEqualTo("period", period)
             .orderBy("date", Query.Direction.DESCENDING)
         return try {
-            query.get(Source.CACHE).await()
+            val result = query.get(Source.CACHE).await()
                 .documents.mapNotNull { it.toObject(ShoppingSession::class.java)?.copy(id = it.id) }
+            AppLogger.d(TAG, "getSessionsByPeriod cache → ${result.size} items")
+            result
         } catch (_: Exception) {
+            AppLogger.w(TAG, "getSessionsByPeriod cache miss → server")
             try {
-                query.get().await()
+                val result = query.get().await()
                     .documents.mapNotNull { it.toObject(ShoppingSession::class.java)?.copy(id = it.id) }
-            } catch (_: Exception) { emptyList() }
+                AppLogger.d(TAG, "getSessionsByPeriod server → ${result.size} items")
+                result
+            } catch (e: Exception) { AppLogger.e(TAG, "getSessionsByPeriod FAILED", e); emptyList() }
         }
     }
 }

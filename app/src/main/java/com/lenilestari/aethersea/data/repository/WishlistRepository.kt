@@ -1,15 +1,15 @@
 package com.lenilestari.aethersea.data.repository
 
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.Source
 import com.lenilestari.aethersea.data.model.Wishlist
 import com.lenilestari.aethersea.util.AppLogger
+import com.lenilestari.aethersea.util.FirestoreInstance
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withTimeoutOrNull
 
 class WishlistRepository(private val userId: String) {
-    private val db = FirebaseFirestore.getInstance()
+    private val db = FirestoreInstance.db
     private val collection = db.collection("users").document(userId).collection("wishlists")
     private companion object { const val TAG = "WishlistRepo" }
 

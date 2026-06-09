@@ -17,6 +17,7 @@ import com.lenilestari.aethersea.data.repository.BudgetSourceRepository
 import com.lenilestari.aethersea.data.repository.MonthlyBudgetRepository
 import com.lenilestari.aethersea.data.repository.SessionRepository
 import com.lenilestari.aethersea.databinding.ActivityResultBinding
+import com.lenilestari.aethersea.processor.KamusLearningManager
 import com.lenilestari.aethersea.processor.VoiceBatchManager
 import com.lenilestari.aethersea.ui.adapters.ParsedItemAdapter
 import com.lenilestari.aethersea.ui.home.MainActivity
@@ -121,10 +122,12 @@ class ResultActivity : AppCompatActivity() {
                 )
                 val result = sessionRepo.addSession(session)
                 if (result.isSuccess) {
-                    // Recalculate fire-and-forget — jangan block navigasi
+                    // Recalculate + AI learning — fire-and-forget, jangan block navigasi
                     @OptIn(kotlinx.coroutines.DelicateCoroutinesApi::class)
                     kotlinx.coroutines.GlobalScope.launch {
                         runCatching { budgetCalc.recalculateCurrentMonth() }
+                        AppLogger.d("ResultActivity", "triggerLearning items=${finalItems.size}")
+                        runCatching { KamusLearningManager.analyze(applicationContext, finalItems) }
                     }
                     showSnackbar(binding.root, "✓ Belanja berhasil disimpan!")
                     kotlinx.coroutines.delay(800)

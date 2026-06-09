@@ -15,6 +15,20 @@ android {
     namespace = "com.lenilestari.aethersea"
     compileSdk = 36
 
+    signingConfigs {
+        create("release") {
+            // takeIf { isNotBlank() } mencegah error "Cannot convert '' to File"
+            // saat KEYSTORE_PATH belum diisi di local.properties
+            val ksPath = localProps.getProperty("KEYSTORE_PATH", "").trim()
+            if (ksPath.isNotBlank()) {
+                storeFile     = file(ksPath)
+                storePassword = localProps.getProperty("KEYSTORE_PASS", "")
+                keyAlias      = localProps.getProperty("KEY_ALIAS", "")
+                keyPassword   = localProps.getProperty("KEY_PASS", "")
+            }
+        }
+    }
+
     defaultConfig {
         applicationId = "com.lenilestari.aethersea"
         minSdk = 29
@@ -41,6 +55,7 @@ android {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
