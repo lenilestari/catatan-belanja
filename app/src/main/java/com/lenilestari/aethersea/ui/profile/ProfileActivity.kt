@@ -133,7 +133,7 @@ class ProfileActivity : AppCompatActivity() {
         MaterialAlertDialogBuilder(this)
             .setTitle("Bantuan")
             .setMessage(
-                "Catatan Belanja membantu kamu mencatat pengeluaran harian dengan mudah " +
+                "Aethersea membantu kamu mencatat pengeluaran harian dengan mudah " +
                 "menggunakan input suara atau teks.\n\n" +
                 "• Tekan mikrofon untuk input suara\n" +
                 "• Ketik manual untuk input cepat\n" +
